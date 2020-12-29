@@ -1,0 +1,48 @@
+{
+    "room_id": "",
+    "recorder": {
+        "keep_raw_record": true
+    },
+    "parser": {
+        "interval": 60,
+        "up_ratio": 2.5,
+        "down_ratio": 0.75,
+        "topK":5
+    },
+    "clipper": {
+        "enable_clipper":true,
+        "min_length": 60,
+        "before_offset": 0,
+        "end_offset": 0
+    },
+    "uploader": {
+        "account": {
+            "username": "",
+            "password": ""
+        },
+        "record": {
+            "upload_record": true,
+            "keep_record_after_upload": true,
+            "split_interval": 3600,
+            "title": "【某霜】{date}直播录播",
+            "tid": 21,
+            "tags": [
+                "直播录播",
+                "某霜"
+            ],
+            "desc": "切片自{date} 某霜 直播\n---------------------------------------\n本视频由全自动切片型智能DD机上传~"
+        },
+        "clips": {
+            "upload_clips": true,
+            "keep_clips_after_upload": true,
+            "title": "【某霜】{date}直播精彩剪辑",
+            "tid": 21,
+            "tags": [
+                "直播录播",
+                "剪辑",
+                "某霜"
+            ],
+            "desc": "切片自{date} 某霜 直播\n---------------------------------------\n本视频由全自动切片型智能DD机剪辑上传~"
+        }
+    }
+}

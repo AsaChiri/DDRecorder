@@ -1,0 +1,16 @@
+{
+    "check_interval":60,
+    "global_path": {
+        "data_path": "./data",
+        "ffmpeg_path": "ffmepg"
+    },
+    "logger": {
+        "log_path": "./log",
+        "log_level": "DEBUG"
+    },
+    "request_header": {},
+    "uploader":{
+        "thread_pool_workers":1,
+        "max_retry":10
+    }
+}
