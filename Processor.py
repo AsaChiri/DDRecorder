@@ -23,7 +23,7 @@ def parse_lines(lines: List[str]) -> Dict[datetime.datetime, List[str]]:
     return_dict = {}
     for line in lines:
         time, text = __parse_line(line)
-        if return_dict[time] is None:
+        if return_dict.get(time, None) is None:
             return_dict[time] = [text]
         else:
             return_dict[time].append(text)
@@ -77,8 +77,11 @@ def count(danmus: Dict[datetime.datetime, List[str]], live_start: datetime.datet
     for time, text in danmus.items():
         delta = int((time - live_start).total_seconds())
         pos_time = (delta // interval) * interval
-        return_dict[live_start +
-                    datetime.timedelta(seconds=pos_time)].append(text)
+        key_time = live_start + datetime.timedelta(seconds=pos_time)
+        if return_dict.get(key_time, None) is None:
+            return_dict[key_time] = text
+        else:
+            return_dict[key_time].extend(text)
     return return_dict
 
 
@@ -119,15 +122,15 @@ class Processor(BiliLive):
         self.live_start = self.global_start
         self.live_duration = 0
         logging.basicConfig(level=utils.get_log_level(config),
-                        format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                        datefmt='%a, %d %b %Y %H:%M:%S',
-                        filename=os.path.join(config['root']['logger']['log_path'], datetime.datetime.now(
-                        ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
-                        filemode='a')
-                        
+                            format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                            datefmt='%a, %d %b %Y %H:%M:%S',
+                            filename=os.path.join(config['root']['logger']['log_path'], datetime.datetime.now(
+                            ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
+                            filemode='a')
+
     def pre_concat(self) -> None:
         filelist = os.listdir(self.record_dir)
-        with open(self.merge_conf_path, "w") as f:
+        with open(self.merge_conf_path, "w", encoding="utf-8") as f:
             for filename in filelist:
                 if os.path.splitext(
                         os.path.join(self.record_dir, filename))[1] == ".flv" and os.path.getsize(os.path.join(self.record_dir, filename)) > 1024*1024:
@@ -137,12 +140,13 @@ class Processor(BiliLive):
                         self.record_dir, filename), ts_path, self.config['root']['global_path']['ffmpeg_path'])
                     if not self.config['spec']['recorder']['keep_raw_record']:
                         os.remove(os.path.join(self.record_dir, filename))
+                    # ts_path = os.path.join(self.record_dir, filename)
                     duration = float(ffmpeg.probe(ts_path)[
                                      'format']['duration'])
                     start_time = get_start_time(filename)
                     self.times.append((start_time, duration))
                     f.write(
-                        f"file '{os.path.relpath(ts_path,os.path.dirname(self.merge_conf_path))}'\n")
+                        f"file '{ts_path}'\n")
         _ = concat(self.merge_conf_path, self.merged_file_path,
                    self.config['root']['global_path']['ffmpeg_path'])
         self.times.sort(key=lambda x: x[0])
@@ -152,17 +156,17 @@ class Processor(BiliLive):
 
     def __cut_vedio(self, outhint: List[str], start_time: int, delta: int) -> subprocess.CompletedProcess:
         output_file = os.path.join(
-            self.outputs_dir, f"{self.room_id}_{self.global_start}_{start_time:012}_{outhint}.mp4")
+            self.outputs_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{start_time:012}_{outhint}.mp4")
         cmd = f'ffmpeg -y -ss {start_time} -t {delta} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
         ret = subprocess.run(cmd, shell=True, check=True)
         return ret
 
     def cut(self, cut_points: List[Tuple[datetime.datetime, datetime.datetime, List[str]]], min_length: int = 60) -> None:
         for cut_start, cut_end, tags in cut_points:
-            start = get_true_timestamp(self.times, datetime.datetime.strptime(
-                cut_start, '%Y-%m-%d %H-%M')) + self.config['spec']['clipper']['before_offset']
-            end = get_true_timestamp(self.times, datetime.datetime.strptime(
-                cut_end, '%Y-%m-%d %H-%M')) + self.config['spec']['clipper']['end_offset'] - self.config['spec']['clipper']['before_offset']
+            start = get_true_timestamp(self.times,
+                                       cut_start) + self.config['spec']['clipper']['before_offset']
+            end = get_true_timestamp(self.times,
+                                     cut_end) + self.config['spec']['clipper']['end_offset'] - self.config['spec']['clipper']['before_offset']
             delta = end-start
             outhint = " ".join(tags)
             if delta > min_length:
@@ -177,7 +181,7 @@ class Processor(BiliLive):
         num_splits = int(duration) // split_interval + 1
         for i in range(num_splits):
             output_file = os.path.join(
-                self.splits_dir, f"{self.room_id}_{self.global_start}_{i}.mp4")
+                self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{i}.mp4")
             cmd = f'ffmpeg -y -ss {i*split_interval} -t {split_interval} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
             _ = subprocess.run(cmd, shell=True, check=True)
 

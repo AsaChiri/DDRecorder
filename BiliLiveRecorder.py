@@ -1,14 +1,16 @@
+import datetime
 import logging
 import os
 import re
-import datetime
+
 import requests
-
-from BiliLive import BiliLive
-import utils
-
 import urllib3
+
+import utils
+from BiliLive import BiliLive
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 class BiliLiveRecorder(BiliLive):
     def __init__(self, config: dict, global_start: datetime.datetime):
@@ -38,6 +40,11 @@ class BiliLiveRecorder(BiliLive):
                 'Error while recording:' + str(e)))
 
     def run(self) -> None:
+        logging.basicConfig(level=utils.get_log_level(self.config),
+                        format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                        datefmt='%a, %d %b %Y %H:%M:%S',
+                        handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "LiveRecoder_"+datetime.datetime.now(
+                        ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),"a", encoding="utf-8")])
         while True:
             try:
                 if self.live_status:

@@ -123,3 +123,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+data/
+log/
+config/
+!config/root_config.json
+!config/example.spec.json

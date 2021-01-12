@@ -1,14 +1,14 @@
-import os
 import asyncio
 import datetime
 import json
 import logging
+import os
 import zlib
 
 from aiowebsocket.converses import AioWebSocket
-from BiliLive import BiliLive
 
 import utils
+from BiliLive import BiliLive
 
 
 class BiliDanmuRecorder(BiliLive):
@@ -16,12 +16,6 @@ class BiliDanmuRecorder(BiliLive):
         super().__init__(config)
         self.log_filename = utils.init_danmu_log_file(self.room_id,global_start,config['root']['global_path']['data_path'])
         self.room_server_api = 'wss://broadcastlv.chat.bilibili.com/sub'
-        logging.basicConfig(level=utils.get_log_level(config),
-                        format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                        datefmt='%a, %d %b %Y %H:%M:%S',
-                        filename=os.path.join(config['root']['logger']['log_path'], datetime.datetime.now(
-                        ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
-                        filemode='a')
 
     def __log_danmu(self, body:str)->None:
         with open(self.log_filename, 'a') as fd:
@@ -51,6 +45,11 @@ class BiliDanmuRecorder(BiliLive):
             await asyncio.wait(tasks)
 
     def run(self):
+        logging.basicConfig(level=utils.get_log_level(self.config),
+                        format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                        datefmt='%a, %d %b %Y %H:%M:%S',
+                        handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "DanmuRecoder_"+datetime.datetime.now(
+                        ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),"a", encoding="utf-8")])
         try:
             asyncio.get_event_loop().run_until_complete(self.__startup())
         except KeyboardInterrupt as exc:
@@ -85,7 +84,8 @@ class BiliDanmuRecorder(BiliLive):
             try:
                 jd = json.loads(data[16:].decode('utf-8', errors='ignore'))
                 if(jd['cmd'] == 'DANMU_MSG'):
-                    self.__log_danmu(jd['info'][1])
+                    if jd['info'][1] != "":
+                        self.__log_danmu(jd['info'][1])
                     logging.debug(self.generate_log(
                         f"[DANMU] {jd['info'][2][1]}: {jd['info'][1]}\n"))
                 elif(jd['cmd'] == 'SEND_GIFT'):

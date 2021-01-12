@@ -6,6 +6,7 @@ from bilibiliuploader.bilibiliuploader import BilibiliUploader
 from bilibiliuploader.core import VideoPart
 
 from BiliLive import BiliLive
+import utils
 
 
 class Uploader(BiliLive):
@@ -16,18 +17,19 @@ class Uploader(BiliLive):
         self.uploader = BilibiliUploader()
         self.uploader.login(config['spec']['uploader']['account']['username'],
                             config['spec']['uploader']['account']['password'])
-        logging.basicConfig(level=utils.get_log_level(config),
-                        format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                        datefmt='%a, %d %b %Y %H:%M:%S',
-                        filename=os.path.join(config['root']['logger']['log_path'], datetime.datetime.now(
-                        ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
-                        filemode='a')
-                        
-    def upload(self, global_start:datetime.datetime) -> None:
+
+    def upload(self, global_start: datetime.datetime) -> dict:
+        logging.basicConfig(level=utils.get_log_level(self.config),
+                            format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                            datefmt='%a, %d %b %Y %H:%M:%S',
+                            filename=os.path.join(self.config['root']['logger']['log_path'], "Uploader_"+datetime.datetime.now(
+                            ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
+                            filemode='a')
+        return_dict = {}
         if self.config['spec']['uploader']['clips']['upload_clips']:
             output_parts = []
-            datestr = datetime.datetime.strptime(
-                global_start, '%Y-%m-%d_%H-%M-%S').strftime('%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
+            datestr = global_start.strftime(
+                '%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
             filelists = os.listdir(self.output_dir)
             for filename in filelists:
                 if os.path.getsize(os.path.join(self.output_dir, filename)) < 1024*1024:
@@ -54,6 +56,10 @@ class Uploader(BiliLive):
                 max_retry=self.config['root']['uploader']['max_retry'],
             )
             print(avid, bvid)
+            return_dict["clips"] = {
+                "avid": avid,
+                "bvid": bvid
+            }
         if self.config['spec']['uploader']['record']['upload_record']:
             splits_parts = []
             datestr = datetime.datetime.strptime(
@@ -85,3 +91,8 @@ class Uploader(BiliLive):
                 max_retry=self.config['root']['uploader']['max_retry'],
             )
             print(avid, bvid)
+            return_dict["record"] = {
+                "avid": avid,
+                "bvid": bvid
+            }
+        return return_dict
