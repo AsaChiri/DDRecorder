@@ -1,5 +1,5 @@
 {
-    "room_id": "22637920",
+    "room_id": "22671795",
     "recorder": {
         "keep_raw_record": false
     },
@@ -24,31 +24,31 @@
             "upload_record": false,
             "keep_record_after_upload": true,
             "split_interval": 3600,
-            "title": "【桃井最中Monaka】{date}直播录播",
+            "title": "【暗妃鲁咪蕾Monaka】{date}直播录播",
             "tid": 27,
             "tags": [
                 "直播录播",
-                "桃井最中Monaka",
+                "暗妃鲁咪蕾",
                 "虚拟主播",
                 "VTuber",
                 "虚拟UP主"
             ],
-            "desc": "切片自{date} 桃井最中Monaka 直播\n---------------------------------------\n本视频由全自动切片型智能DD机上传~"
+            "desc": "切片自{date} 暗妃鲁咪蕾Official 直播\n---------------------------------------\n本视频由全自动切片型智能DD机上传~"
         },
         "clips": {
             "upload_clips": true,
             "keep_clips_after_upload": true,
-            "title": "【桃井最中Monaka】{date}直播精彩剪辑【自动切片】",
+            "title": "【暗妃鲁咪蕾】{date}直播精彩剪辑【自动切片】",
             "tid": 27,
             "tags": [
                 "直播录播",
                 "剪辑",
-                "桃井最中Monaka",
+                "暗妃鲁咪蕾",
                 "虚拟主播",
                 "VTuber",
                 "虚拟UP主"
             ],
-            "desc": "切片自{date} 桃井最中Monaka 直播\n---------------------------------------\n本视频由全自动切片型智能DD机剪辑上传~"
+            "desc": "切片自{date} 暗妃鲁咪蕾Official 直播\n---------------------------------------\n本视频由全自动切片型智能DD机剪辑上传~"
         }
     },
     "backup":true
