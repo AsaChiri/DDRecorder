@@ -187,7 +187,7 @@ class Processor(BiliLive):
 
     def run(self) -> None:
         self.pre_concat()
-        with open(self.danmu_path, "r") as f:
+        with open(self.danmu_path, "r",encoding="utf-8") as f:
             lines = f.readlines()
         if self.config['spec']['clipper']['enable_clipper']:
             raw_danmu_dict = parse_lines(lines)

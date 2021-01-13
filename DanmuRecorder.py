@@ -18,7 +18,7 @@ class BiliDanmuRecorder(BiliLive):
         self.room_server_api = 'wss://broadcastlv.chat.bilibili.com/sub'
 
     def __log_danmu(self, body:str)->None:
-        with open(self.log_filename, 'a') as fd:
+        with open(self.log_filename, 'a',encoding="utf-8") as fd:
             fd.write(datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]'))
             fd.write(body+'\n')
 
