@@ -365,7 +365,7 @@ def upload_chunk(upload_url, server_file_name, local_file_name, chunk_data, chun
             return True
         else:
             return False
-    except :
+    except Exception as e:
         return False
 
 

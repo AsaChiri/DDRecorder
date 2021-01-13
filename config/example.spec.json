@@ -11,9 +11,9 @@
     },
     "clipper": {
         "enable_clipper":true,
-        "min_length": 60,
-        "before_offset": 0,
-        "end_offset": 0
+        "min_length": 30,
+        "before_offset": -20,
+        "end_offset": 10
     },
     "uploader": {
         "account": {
@@ -24,7 +24,7 @@
             "upload_record": false,
             "keep_record_after_upload": true,
             "split_interval": 3600,
-            "title": "【暗妃鲁咪蕾Monaka】{date}直播录播",
+            "title": "【暗妃鲁咪蕾】{date}直播录播",
             "tid": 27,
             "tags": [
                 "直播录播",
