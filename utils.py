@@ -12,14 +12,14 @@ def get_log_level(config: dict) -> int:
         return logging.WARN
     if config['root']['logger']['log_level'] == 'ERROR':
         return logging.ERROR
+    return logging.INFO
 
-
-def check_and_create_dir(dirs: str):
+def check_and_create_dir(dirs: str) -> None:
     if not os.path.exists(dirs):
         os.mkdir(dirs)
 
 
-def init_data_dirs(root_dir: str = os.getcwd()):
+def init_data_dirs(root_dir: str = os.getcwd()) -> None:
     check_and_create_dir(os.path.join(root_dir, 'data'))
     check_and_create_dir(os.path.join(root_dir, 'data', 'records'))
     check_and_create_dir(os.path.join(root_dir, 'data', 'merged'))
@@ -77,7 +77,7 @@ def get_merge_conf_path(room_id: str, global_start: datetime.datetime, root_dir:
     return filename
 
 
-def del_files_and_dir(dirs: str):
+def del_files_and_dir(dirs: str) -> None:
     for filename in os.listdir(dirs):
         os.remove(os.path.join(dirs, filename))
     os.rmdir(dirs)

@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 import datetime
 import json
 import logging
@@ -30,6 +32,10 @@ def proc(config: dict, record_dir: str, danmu_path: str) -> None:
         cc_process = Process(
             target=cc.check)
         cc_process.start()
+    if config['root']['enable_baiduyun'] and config['spec']['backup']:
+        bp = ByPy()
+        bp.upload(p.merged_file_path)
+
 
 
 if __name__ == "__main__":
@@ -51,6 +57,9 @@ if __name__ == "__main__":
                         handlers=[logging.FileHandler(os.path.join(config['root']['logger']['log_path'], "Main_"+datetime.datetime.now(
                         ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), "a", encoding="utf-8")])
     utils.init_data_dirs(config['root']['global_path']['data_path'])
+    if config['root']['enable_baiduyun']:
+        from bypy import ByPy
+        bp = ByPy()
     # proc(config,"./data/data/records/21919321_2021-01-11_21-00-29","./data/data/danmu/21919321_2021-01-11_21-00-29_danmu.log")
     bl = BiliLive(config)
     prev_live_status = False

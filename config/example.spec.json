@@ -5,8 +5,8 @@
     },
     "parser": {
         "interval": 30,
-        "up_ratio": 3,
-        "down_ratio": 0.8,
+        "up_ratio": 2.5,
+        "down_ratio": 0.75,
         "topK":5
     },
     "clipper": {
@@ -50,5 +50,6 @@
             ],
             "desc": "切片自{date} 桃井最中Monaka 直播\n---------------------------------------\n本视频由全自动切片型智能DD机剪辑上传~"
         }
-    }
+    },
+    "backup":true
 }
