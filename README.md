@@ -22,6 +22,7 @@
 - uploader: 上传器相关设置
   - thread_pool_workers: 上传时的线程池大小。默认：1
   - max_retry: 最大重试次数。默认：10
+- enable_baiduyun：是否开启百度云功能。
 
 ### 直播间特定设置
 - room_id: 房间号
@@ -56,3 +57,4 @@
     - tid：分区编号，可在 https://github.com/FortuneDayssss/BilibiliUploader/wiki/Bilibili%E5%88%86%E5%8C%BA%E5%88%97%E8%A1%A8 查询
     - tags：上传视频的标签
     - desc：上传视频的描述，可以用 {date} 标识日期
+- backup：是否将录像备份到百度云。
