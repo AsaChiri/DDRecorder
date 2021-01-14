@@ -1,5 +1,8 @@
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
+ 
+## 感谢
+FortuneDayssss/BilibiliUploader
 
 ## 安装指南
 1. 安装Python >= 3.7 https://www.python.org/downloads/release/python-386/
