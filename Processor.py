@@ -187,6 +187,8 @@ class Processor(BiliLive):
 
     def run(self) -> None:
         self.pre_concat()
+        if not self.config['spec']['recorder']['keep_raw_record']:
+            utils.del_files_and_dir(self.record_dir)
         with open(self.danmu_path, "r",encoding="utf-8") as f:
             lines = f.readlines()
         if self.config['spec']['clipper']['enable_clipper']:

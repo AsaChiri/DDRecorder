@@ -65,7 +65,7 @@ if __name__ == "__main__":
     prev_live_status = False
     while True:
         if not prev_live_status and bl.live_status:
-            print("开播啦~")
+            print(f"开播啦~现在是{datetime.datetime.now()}")
             prev_live_status = bl.live_status
             start = datetime.datetime.now()
             blr = BiliLiveRecorder(config, start)

@@ -3,9 +3,11 @@ import datetime
 import logging
 
 import requests
-
 import urllib3
+from requests.adapters import HTTPAdapter
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 class BaseLive(metaclass=abc.ABCMeta):
     __last_check_time = datetime.datetime.now(
@@ -24,6 +26,7 @@ class BaseLive(metaclass=abc.ABCMeta):
         }
         self.headers = {**default_headers, **config['root']['request_header']}
         self.session = requests.session()
+        self.session.mount('https://', HTTPAdapter(max_retries=3))
         self.room_id = ''
         self.site_name = ''
         self.site_domain = ''
@@ -32,14 +35,17 @@ class BaseLive(metaclass=abc.ABCMeta):
             seconds=config['root']['check_interval'])
 
     def common_request(self, method: str, url: str, params: dict = None, data: dict = None) -> requests.Response:
-        connection = None
-        if method == 'GET':
-            connection = self.session.get(
-                url, headers=self.headers, params=params, verify=False)
-        if method == 'POST':
-            connection = self.session.post(
-                url, headers=self.headers, params=params, data=data, verify=False)
-        return connection
+        try:
+            connection = None
+            if method == 'GET':
+                connection = self.session.get(
+                    url, headers=self.headers, params=params, verify=False, timeout=5)
+            if method == 'POST':
+                connection = self.session.post(
+                    url, headers=self.headers, params=params, data=data, verify=False, timeout=5)
+            return connection
+        except requests.exceptions.RequestException as e:
+            logging.error(self.generate_log("Request Error"+str(e)))
 
     @abc.abstractmethod
     def get_room_info(self):
