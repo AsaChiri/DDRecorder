@@ -164,9 +164,9 @@ class Processor(BiliLive):
     def cut(self, cut_points: List[Tuple[datetime.datetime, datetime.datetime, List[str]]], min_length: int = 60) -> None:
         for cut_start, cut_end, tags in cut_points:
             start = get_true_timestamp(self.times,
-                                       cut_start) + self.config['spec']['clipper']['before_offset']
+                                       cut_start) + self.config['spec']['clipper']['start_offset']
             end = get_true_timestamp(self.times,
-                                     cut_end) + self.config['spec']['clipper']['end_offset'] - self.config['spec']['clipper']['before_offset']
+                                     cut_end) + self.config['spec']['clipper']['end_offset'] - self.config['spec']['clipper']['start_offset']
             delta = end-start
             outhint = " ".join(tags)
             if delta > min_length:

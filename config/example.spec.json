@@ -12,7 +12,7 @@
     "clipper": {
         "enable_clipper":true,
         "min_length": 30,
-        "before_offset": -20,
+        "start_offset": -20,
         "end_offset": 10
     },
     "uploader": {
