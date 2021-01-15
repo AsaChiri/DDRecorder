@@ -187,8 +187,17 @@ class Processor(BiliLive):
 
     def run(self) -> None:
         self.pre_concat()
-        if not self.config['spec']['recorder']['keep_raw_record']:
-            utils.del_files_and_dir(self.record_dir)
+        # if not self.config['spec']['recorder']['keep_raw_record']:
+        #     utils.del_files_and_dir(self.record_dir)
+
+        # duration = float(ffmpeg.probe(self.merged_file_path)[
+        #                              'format']['duration'])
+        # start_time = get_start_time(self.merged_file_path)
+        # self.times.append((start_time, duration))
+        # self.live_start = self.times[0][0]
+        # self.live_duration = (
+        #     self.times[-1][0]-self.times[0][0]).total_seconds()+self.times[-1][1]
+
         with open(self.danmu_path, "r",encoding="utf-8") as f:
             lines = f.readlines()
         if self.config['spec']['clipper']['enable_clipper']:

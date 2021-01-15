@@ -30,7 +30,9 @@ class BiliLiveRecorder(BiliLive):
             }
             headers = {**default_headers, **
                        self.config['root']['request_header']}
-            resp = requests.get(record_url, stream=True, headers=headers)
+            resp = requests.get(record_url, stream=True,
+                                headers=headers,
+                                timeout=20, max_retries=3)
             with open(output_filename, "wb") as f:
                 for chunk in resp.iter_content(chunk_size=1024):
                     if chunk:
@@ -41,10 +43,10 @@ class BiliLiveRecorder(BiliLive):
 
     def run(self) -> None:
         logging.basicConfig(level=utils.get_log_level(self.config),
-                        format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                        datefmt='%a, %d %b %Y %H:%M:%S',
-                        handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "LiveRecoder_"+datetime.datetime.now(
-                        ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),"a", encoding="utf-8")])
+                            format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                            datefmt='%a, %d %b %Y %H:%M:%S',
+                            handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "LiveRecoder_"+datetime.datetime.now(
+                            ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), "a", encoding="utf-8")])
         while True:
             try:
                 if self.live_status:
