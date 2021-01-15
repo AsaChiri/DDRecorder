@@ -33,6 +33,7 @@ def proc(config: dict, record_dir: str, danmu_path: str) -> None:
             target=cc.check)
         cc_process.start()
     if config['root']['enable_baiduyun'] and config['spec']['backup']:
+        from bypy import ByPy
         bp = ByPy()
         bp.upload(p.merged_file_path)
 
