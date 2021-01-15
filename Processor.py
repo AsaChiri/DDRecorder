@@ -187,9 +187,8 @@ class Processor(BiliLive):
 
     def run(self) -> None:
         self.pre_concat()
-        # if not self.config['spec']['recorder']['keep_raw_record']:
-        #     utils.del_files_and_dir(self.record_dir)
-
+        if not self.config['spec']['recorder']['keep_raw_record']:
+            utils.del_files_and_dir(self.record_dir)
         # duration = float(ffmpeg.probe(self.merged_file_path)[
         #                              'format']['duration'])
         # start_time = get_start_time(self.merged_file_path)
@@ -210,3 +209,4 @@ class Processor(BiliLive):
         if self.config['spec']['uploader']['record']['upload_record']:
             self.split(self.config['spec']['uploader']
                        ['record']['split_interval'])
+        

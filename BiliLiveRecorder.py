@@ -32,7 +32,7 @@ class BiliLiveRecorder(BiliLive):
                        self.config['root']['request_header']}
             resp = requests.get(record_url, stream=True,
                                 headers=headers,
-                                timeout=20, max_retries=3)
+                                timeout=20)
             with open(output_filename, "wb") as f:
                 for chunk in resp.iter_content(chunk_size=1024):
                     if chunk:
