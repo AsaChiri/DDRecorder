@@ -357,7 +357,7 @@ def upload_chunk(upload_url, server_file_name, local_file_name, chunk_data, chun
             cookies={
                 'PHPSESSID': server_file_name
             },
-            timeout=20
+            timeout=120
         )
         print(r.status_code)
         print(r.content)

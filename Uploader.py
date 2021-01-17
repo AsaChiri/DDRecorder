@@ -9,6 +9,7 @@ from BiliLive import BiliLive
 import utils
 
 
+
 class Uploader(BiliLive):
     def __init__(self, output_dir: str, splits_dir: str, config: dict):
         super().__init__(config)
@@ -41,21 +42,22 @@ class Uploader(BiliLive):
                     desc=self.config['spec']['uploader']['clips']['desc'].format(
                         date=datestr),
                 ))
-
-            avid, bvid = self.uploader.upload(
-                parts=output_parts,
-                copyright=2,
-                title=self.config['spec']['uploader']['clips']['title'].format(
-                    date=datestr),
-                tid=self.config['spec']['uploader']['clips']['tid'],
-                tag=",".join(self.config['spec']['uploader']['clips']['tags']),
-                desc=self.config['spec']['uploader']['clips']['desc'].format(
-                    date=datestr),
-                source="https://live.bilibili.com/"+self.room_id,
-                thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
-                max_retry=self.config['root']['uploader']['max_retry'],
-            )
-            print(avid, bvid)
+            bvid = None
+            while bvid is None:
+                avid, bvid = self.uploader.upload(
+                    parts=output_parts,
+                    copyright=2,
+                    title=self.config['spec']['uploader']['clips']['title'].format(
+                        date=datestr),
+                    tid=self.config['spec']['uploader']['clips']['tid'],
+                    tag=",".join(self.config['spec']['uploader']['clips']['tags']),
+                    desc=self.config['spec']['uploader']['clips']['desc'].format(
+                        date=datestr),
+                    source="https://live.bilibili.com/"+self.room_id,
+                    thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
+                    max_retry=self.config['root']['uploader']['max_retry'],
+                )
+                print(avid, bvid)
             return_dict["clips"] = {
                 "avid": avid,
                 "bvid": bvid
@@ -75,22 +77,23 @@ class Uploader(BiliLive):
                     desc=self.config['spec']['uploader']['record']['desc'].format(
                         date=datestr),
                 ))
-
-            avid, bvid = self.uploader.upload(
-                parts=splits_parts,
-                copyright=2,
-                title=self.config['spec']['uploader']['record']['title'].format(
-                    date=datestr),
-                tid=self.config['spec']['uploader']['record']['tid'],
-                tag=",".join(self.config['spec']
-                             ['uploader']['record']['tags']),
-                desc=self.config['spec']['uploader']['record']['desc'].format(
-                    date=datestr),
-                source="https://live.bilibili.com/"+self.room_id,
-                thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
-                max_retry=self.config['root']['uploader']['max_retry'],
-            )
-            print(avid, bvid)
+            bvid = None
+            while bvid is None:
+                avid, bvid = self.uploader.upload(
+                    parts=splits_parts,
+                    copyright=2,
+                    title=self.config['spec']['uploader']['record']['title'].format(
+                        date=datestr),
+                    tid=self.config['spec']['uploader']['record']['tid'],
+                    tag=",".join(self.config['spec']
+                                ['uploader']['record']['tags']),
+                    desc=self.config['spec']['uploader']['record']['desc'].format(
+                        date=datestr),
+                    source="https://live.bilibili.com/"+self.room_id,
+                    thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
+                    max_retry=self.config['root']['uploader']['max_retry'],
+                )
+                print(avid, bvid)
             return_dict["record"] = {
                 "avid": avid,
                 "bvid": bvid
