@@ -169,7 +169,7 @@ class Processor(BiliLive):
                                      cut_end) + self.config['spec']['clipper']['end_offset'] - self.config['spec']['clipper']['start_offset']
             delta = end-start
             outhint = " ".join(tags)
-            if delta > min_length:
+            if delta >= min_length:
                 self.__cut_vedio(outhint, max(
                     0, int(start)), int(delta))
 
@@ -209,4 +209,4 @@ class Processor(BiliLive):
         if self.config['spec']['uploader']['record']['upload_record']:
             self.split(self.config['spec']['uploader']
                        ['record']['split_interval'])
-        
+                       
