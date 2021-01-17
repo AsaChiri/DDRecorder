@@ -62,8 +62,8 @@ class Uploader(BiliLive):
             }
         if self.config['spec']['uploader']['record']['upload_record']:
             splits_parts = []
-            datestr = datetime.datetime.strptime(
-                global_start, '%Y-%m-%d_%H-%M-%S').strftime('%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
+            datestr = global_start.strftime(
+                '%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
             filelists = os.listdir(self.splits_dir)
             for filename in filelists:
                 if os.path.getsize(os.path.join(self.splits_dir, filename)) < 1024*1024:

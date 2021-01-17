@@ -64,6 +64,7 @@ class BiliDanmuRecorder(BiliLive):
                             handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "DanmuRecoder_"+datetime.datetime.now(
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), "a", encoding="utf-8")])
         try:
+            _ = open(self.log_filename, 'a', encoding="utf-8") # 提前创建弹幕记录文件避免因为没有弹幕而失败
             asyncio.get_event_loop().run_until_complete(self.__startup())
         except KeyboardInterrupt:
             logging.info(self.generate_log("键盘指令退出"))

@@ -197,9 +197,9 @@ class Processor(BiliLive):
         # self.live_duration = (
         #     self.times[-1][0]-self.times[0][0]).total_seconds()+self.times[-1][1]
 
-        with open(self.danmu_path, "r",encoding="utf-8") as f:
-            lines = f.readlines()
         if self.config['spec']['clipper']['enable_clipper']:
+            with open(self.danmu_path, "r",encoding="utf-8") as f:
+                lines = f.readlines()
             raw_danmu_dict = parse_lines(lines)
             counted_danmu_dict = count(
                 raw_danmu_dict, self.live_start, self.live_duration, self.config['spec']['parser']['interval'])
