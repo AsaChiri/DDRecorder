@@ -61,7 +61,7 @@ if __name__ == "__main__":
     if config['root']['enable_baiduyun']:
         from bypy import ByPy
         bp = ByPy()
-    # proc(config,"./data/data/records/22384516_2021-01-14_20-56-13","./data/data/danmu/22384516_2021-01-14_20-56-13_danmu.log")
+    #proc(config,"./data/data/records/22608112_2021-01-16_09-39-10","./data/data/danmu/22608112_2021-01-16_09-39-10_danmu.log")
     bl = BiliLive(config)
     prev_live_status = False
     while True:

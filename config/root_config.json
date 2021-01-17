@@ -11,7 +11,7 @@
     "request_header": {},
     "uploader":{
         "thread_pool_workers":1,
-        "max_retry":10
+        "max_retry":50
     },
-    "enable_baiduyun":true
+    "enable_baiduyun":false
 }
