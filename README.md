@@ -1,6 +1,8 @@
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
  
+ **Feature-all-in-one分支中正在进行新版本测试**
+ 
 ## 感谢
 FortuneDayssss/BilibiliUploader
 
