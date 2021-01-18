@@ -4,7 +4,7 @@ import logging
 import platform
 import ctypes
 from enum import Enum
-
+import prettytable as pt
 if is_windows():
     import winreg
 
@@ -124,3 +124,27 @@ class state(Enum):
     PROCESSING_RECORDS = 2
     UPLOADING_TO_BILIBILI = 3
     UPLOADING_TO_BAIDUYUN = 4
+
+    def __str__(self):
+        if self.value == -1:
+            return "错误！"
+        if self.value == 0:
+            return "摸鱼中"
+        if self.value == 1:
+            return "开播了"
+        if self.value == 2:
+            return "正在处理视频"
+        if self.value == 3:
+            return "正在上传至Bilibili"
+        if self.value == 4:
+            return "正在上传至百度网盘"
+
+
+def print_log(runner_list: list) -> str:
+    tb = pt.PrettyTable()
+    tb.field_names = ["平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
+    for runner in runner_list:
+        tb.add_row([runner.bl.site_name, runner.bl.room_id, runner.bl.live_status, str(
+            runner.current_state), runner.state_change_time])
+    print(f"    DDRecorder  当前时间：{datetime.datetime.now()}\n")
+    print(tb)
