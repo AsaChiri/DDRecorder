@@ -1,6 +1,6 @@
 import copy
 import datetime
-
+import shutil
 import os
 import re
 import subprocess
@@ -124,7 +124,7 @@ class Processor(BiliLive):
         logging.basicConfig(level=utils.get_log_level(config),
                             format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                             datefmt='%a, %d %b %Y %H:%M:%S',
-                            filename=os.path.join(config['root']['logger']['log_path'], datetime.datetime.now(
+                            filename=os.path.join(config['root']['logger']['log_path'], "Processor_"+datetime.datetime.now(
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
                             filemode='a')
 
@@ -175,7 +175,10 @@ class Processor(BiliLive):
 
     def split(self, split_interval: int = 3600) -> None:
         if split_interval <= 0:
-            split_interval = 3600
+            shutil.copy2(self.merged_file_path, os.path.join(
+                self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_0.mp4"))
+            return
+            
         duration = float(ffmpeg.probe(self.merged_file_path)
                          ['format']['duration'])
         num_splits = int(duration) // split_interval + 1
@@ -198,7 +201,7 @@ class Processor(BiliLive):
         #     self.times[-1][0]-self.times[0][0]).total_seconds()+self.times[-1][1]
 
         if self.config['spec']['clipper']['enable_clipper']:
-            with open(self.danmu_path, "r",encoding="utf-8") as f:
+            with open(self.danmu_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
             raw_danmu_dict = parse_lines(lines)
             counted_danmu_dict = count(
@@ -209,4 +212,3 @@ class Processor(BiliLive):
         if self.config['spec']['uploader']['record']['upload_record']:
             self.split(self.config['spec']['uploader']
                        ['record']['split_interval'])
-                       

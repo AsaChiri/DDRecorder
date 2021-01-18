@@ -10,6 +10,7 @@
     },
     "request_header": {},
     "uploader":{
+        "upload_by_edit":true,
         "thread_pool_workers":1,
         "max_retry":50
     },
