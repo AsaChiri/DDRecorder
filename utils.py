@@ -111,10 +111,10 @@ def add_path(path: str) -> None:
     path_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
                               'Environment', 0, winreg.KEY_ALL_ACCESS)
     path_value = winreg.QueryValueEx(path_key, 'Path')
-    print(path_value)
-    winreg.SetValueEx(path_key, "Path", 0,
-                      winreg.REG_EXPAND_SZ, path_value[0]+abs_path+";")
-    refresh_reg()
+    if path_value[0].find(abs_path) == -1:
+        winreg.SetValueEx(path_key, "Path", 0,
+                        winreg.REG_EXPAND_SZ, path_value[0]+abs_path+";")
+        refresh_reg()
 
 
 class state(Enum):
@@ -142,9 +142,11 @@ class state(Enum):
 
 def print_log(runner_list: list) -> str:
     tb = pt.PrettyTable()
-    tb.field_names = ["平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
+    tb.field_names = ["TID","平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
     for runner in runner_list:
-        tb.add_row([runner.bl.site_name, runner.bl.room_id, runner.bl.live_status, str(
-            runner.current_state), runner.state_change_time])
+        tb.add_row([runner.native_id,runner.bl.site_name, runner.bl.room_id, runner.bl.live_status, 
+            runner.current_state, runner.state_change_time])
     print(f"    DDRecorder  当前时间：{datetime.datetime.now()}\n")
     print(tb)
+    print("\n")
+

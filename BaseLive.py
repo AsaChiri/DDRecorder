@@ -10,13 +10,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class BaseLive(metaclass=abc.ABCMeta):
-    __last_check_time = datetime.datetime.now(
-    )+datetime.timedelta(seconds=-60)
-    __allowed_check_interval = datetime.timedelta(
-        seconds=60)
-    __live_status = False
+    
 
     def __init__(self, config: dict):
+        
+
         default_headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',
@@ -31,7 +29,10 @@ class BaseLive(metaclass=abc.ABCMeta):
         self.site_name = ''
         self.site_domain = ''
         self.config = config
-        BaseLive.__allowed_check_interval = datetime.timedelta(
+        self.__last_check_time = datetime.datetime.now(
+            )+datetime.timedelta(seconds=-config['root']['check_interval'])
+        self.__live_status = False
+        self.__allowed_check_interval = datetime.timedelta(
             seconds=config['root']['check_interval'])
 
     def common_request(self, method: str, url: str, params: dict = None, data: dict = None) -> requests.Response:
@@ -67,17 +68,17 @@ class BaseLive(metaclass=abc.ABCMeta):
 
     @property
     def live_status(self) -> bool:
-        if datetime.datetime.now()-BaseLive.__last_check_time >= BaseLive.__allowed_check_interval:
+        if datetime.datetime.now()-self.__last_check_time >= self.__allowed_check_interval:
             logging.debug(self.generate_log("允许检查"))
-            BaseLive.__live_status = self.__check_live_status()
-            BaseLive.__last_check_time = datetime.datetime.now()
+            self.__live_status = self.__check_live_status()
+            self.__last_check_time = datetime.datetime.now()
         else:
             logging.debug(self.generate_log("间隔不足，使用过去状态"))
-        return BaseLive.__live_status
+        return self.__live_status
 
     @live_status.setter
     def live_status(self, status: bool):
-        BaseLive.__live_status = status
+        self.__live_status = status
 
     def generate_log(self, content: str = '') -> str:
         return f"[Site:{self.site_name} Room:{self.room_id}] {content}"

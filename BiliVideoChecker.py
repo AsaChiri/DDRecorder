@@ -53,8 +53,8 @@ class BiliVideoChecker:
                     logging.info("稿件%s 已开放浏览，准备删除 %s",self.bvid, self.path)
                     utils.del_files_and_dir(self.path)
                     return
+                else:
+                    logging.info("稿件%s 未开放浏览",self.bvid)
+                    time.sleep(self.check_interval)
             except KeyError:
                 pass
-            finally:
-                logging.info("稿件%s 未开放浏览",self.bvid)
-                time.sleep(self.check_interval)
