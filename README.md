@@ -17,7 +17,6 @@ FortuneDayssss/BilibiliUploader
 - check_interval: 直播间开播状态检查间隔，单位为秒。由于B站API访问次数限制，建议不要小于30。如果要多开，建议适当调大。默认：100
 - global_path: 路径相关设置
   - data_path: 数据文件路径。默认："./"
-  - ffmpeg_path: FFmpeg可执行文件路径，如果已经加入PATH中，填写"ffmpeg"即可。默认："ffmpeg"
 - logger: 日志相关设置
   - log_path: 日志文件路径。默认："./log"
   - log_level: 日志级别，可选DEBUG\INFO\WARN

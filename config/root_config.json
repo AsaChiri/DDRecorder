@@ -1,8 +1,7 @@
 {
     "check_interval":100,
     "global_path": {
-        "data_path": "./data",
-        "ffmpeg_path": "ffmpeg"
+        "data_path": "./data"
     },
     "logger": {
         "log_path": "./log",

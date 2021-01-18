@@ -1,13 +1,8 @@
 import datetime
-import json
-import logging
-import os
-import sys
 import time
 from multiprocessing import Process
 
 import utils
-from BaseLive import BaseLive
 from BiliLive import BiliLive
 from BiliLiveRecorder import BiliLiveRecorder
 from DanmuRecorder import BiliDanmuRecorder
@@ -16,15 +11,18 @@ from Uploader import Uploader
 from BiliVideoChecker import BiliVideoChecker
 
 
-class MainRunner(BaseLive):
+class MainRunner:
     def __init__(self, config):
-        super().__init__(config)
+        self.config = config
         self.prev_live_status = False
         self.current_state = utils.state.WAITING_FOR_LIVE_START
         self.state_change_time = datetime.datetime.now()
         if self.config['root']['enable_baiduyun']:
             from bypy import ByPy
-            self.bp = ByPy()
+            bp = ByPy()
+        self.bl = BiliLive(self.config)
+        self.blr = None
+        self.bdr = None
 
     def proc(self, record_dir: str, danmu_path: str) -> None:
         p = Processor(self.config, record_dir, danmu_path)
@@ -50,26 +48,28 @@ class MainRunner(BaseLive):
         self.current_state = utils.state.UPLOADING_TO_BAIDUYUN
         self.state_change_time = datetime.datetime.now()
         if self.config['root']['enable_baiduyun'] and self.config['spec']['backup']:
-            self.bp.upload(p.merged_file_path)
+            from bypy import ByPy
+            bp = ByPy()
+            bp.upload(p.merged_file_path)
+
+        self.current_state = utils.state.WAITING_FOR_LIVE_START
+        self.state_change_time = datetime.datetime.now()
 
     def run(self):
-
-        # proc(config,"./data/data/records/22608112_2021-01-16_09-39-10","./data/data/danmu/22608112_2021-01-16_09-39-10_danmu.log")
-        bl = BiliLive(self.config)
         while True:
-            if not self.prev_live_status and bl.live_status:
+            if not self.prev_live_status and self.bl.live_status:
 
                 self.current_state = utils.state.LIVE_STARTED
                 self.state_change_time = datetime.datetime.now()
 
-                self.prev_live_status = bl.live_status
+                self.prev_live_status = self.bl.live_status
                 start = datetime.datetime.now()
-                blr = BiliLiveRecorder(self.config, start)
-                bdr = BiliDanmuRecorder(self.config, start)
+                self.blr = BiliLiveRecorder(self.config, start)
+                self.bdr = BiliDanmuRecorder(self.config, start)
                 record_process = Process(
-                    target=blr.run)
+                    target=self.blr.run)
                 danmu_process = Process(
-                    target=bdr.run)
+                    target=self.bdr.run)
                 danmu_process.start()
                 record_process.start()
 
@@ -78,9 +78,9 @@ class MainRunner(BaseLive):
 
                 self.current_state = utils.state.PROCESSING_RECORDS
                 self.state_change_time = datetime.datetime.now()
-                self.prev_live_status = bl.live_status
+                self.prev_live_status = self.bl.live_status
                 proc_process = Process(target=self.proc, args=(
-                    blr.record_dir, bdr.log_filename))
+                    self.blr.record_dir, self.bdr.log_filename))
                 proc_process.start()
             else:
                 time.sleep(self.config['root']['check_interval'])

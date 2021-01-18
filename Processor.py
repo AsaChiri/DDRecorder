@@ -85,15 +85,15 @@ def count(danmus: Dict[datetime.datetime, List[str]], live_start: datetime.datet
     return return_dict
 
 
-def flv2ts(input_file: str, output_file: str, ffmpeg_path: str = "ffmpeg") -> subprocess.CompletedProcess:
+def flv2ts(input_file: str, output_file: str) -> subprocess.CompletedProcess:
     ret = subprocess.run(
-        f"{ffmpeg_path} -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -f mpegts {output_file}", shell=True, check=True)
+        f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -f mpegts {output_file}", shell=True, check=True)
     return ret
 
 
-def concat(merge_conf_path: str, merged_file_path: str, ffmpeg_path: str = "ffmpeg") -> subprocess.CompletedProcess:
+def concat(merge_conf_path: str, merged_file_path: str) -> subprocess.CompletedProcess:
     ret = subprocess.run(
-        f"{ffmpeg_path} -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True)
+        f"ffmpeg -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True)
     return ret
 
 
@@ -137,7 +137,7 @@ class Processor(BiliLive):
                     ts_path = os.path.splitext(os.path.join(
                         self.record_dir, filename))[0]+".ts"
                     _ = flv2ts(os.path.join(
-                        self.record_dir, filename), ts_path, self.config['root']['global_path']['ffmpeg_path'])
+                        self.record_dir, filename), ts_path)
                     if not self.config['spec']['recorder']['keep_raw_record']:
                         os.remove(os.path.join(self.record_dir, filename))
                     # ts_path = os.path.join(self.record_dir, filename)
@@ -147,8 +147,7 @@ class Processor(BiliLive):
                     self.times.append((start_time, duration))
                     f.write(
                         f"file '{ts_path}'\n")
-        _ = concat(self.merge_conf_path, self.merged_file_path,
-                   self.config['root']['global_path']['ffmpeg_path'])
+        _ = concat(self.merge_conf_path, self.merged_file_path)
         self.times.sort(key=lambda x: x[0])
         self.live_start = self.times[0][0]
         self.live_duration = (

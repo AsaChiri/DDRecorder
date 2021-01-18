@@ -5,6 +5,11 @@ import platform
 import ctypes
 from enum import Enum
 import prettytable as pt
+
+def is_windows() -> bool:
+    plat_sys = platform.system()
+    return plat_sys == "Windows"
+
 if is_windows():
     import winreg
 
@@ -89,12 +94,6 @@ def del_files_and_dir(dirs: str) -> None:
         os.remove(os.path.join(dirs, filename))
     os.rmdir(dirs)
 
-
-def is_windows() -> bool:
-    plat_sys = platform.system()
-    return plat_sys == "Windows"
-
-
 def refresh_reg() -> None:
     HWND_BROADCAST = 0xFFFF
     WM_SETTINGCHANGE = 0x1A
@@ -112,8 +111,9 @@ def add_path(path: str) -> None:
     path_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
                               'Environment', 0, winreg.KEY_ALL_ACCESS)
     path_value = winreg.QueryValueEx(path_key, 'Path')
+    print(path_value)
     winreg.SetValueEx(path_key, "Path", 0,
-                      winreg.REG_EXPAND_SZ, path_value+";"+abs_path)
+                      winreg.REG_EXPAND_SZ, path_value[0]+abs_path+";")
     refresh_reg()
 
 

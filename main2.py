@@ -10,6 +10,8 @@ import utils
 from MainRunner import MainRunner
 
 if __name__ == "__main__":
+    utils.add_path("./ffmpeg/bin")
+
     all_config_filename = sys.argv[1]
     with open(all_config_filename, "r", encoding="UTF-8") as f:
         all_config = json.load(f)
@@ -37,11 +39,14 @@ if __name__ == "__main__":
         runner_list.append(tr)
         trp = Process(target=tr.run)
         runner_process_list.append(trp)
-    
+
     for trp in runner_process_list:
         trp.start()
-
-    while True:
-        utils.print_log(runner_list)
-        time.sleep(all_config['root']['print_interval'])
     
+    try:
+        while True:
+            utils.print_log(runner_list)
+            time.sleep(all_config['root']['print_interval'])
+    except KeyboardInterrupt :
+        for trp in runner_process_list:
+            trp.close()
