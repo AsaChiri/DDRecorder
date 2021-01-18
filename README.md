@@ -1,19 +1,26 @@
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
+
+**新版本测试分支**
  
 ## 感谢
 FortuneDayssss/BilibiliUploader
 
-## 安装指南
+## 安装指南（Windows）
+1. 在Release下载zip包解压。
+2. 修改配置文件config.json
+3. 运行DDRecorder.exe （使用config.json）或 DDRecorder.exe <配置文件> 
+
+## 安装指南（MacOS/Linux）
 1. 安装Python >= 3.7 https://www.python.org/downloads/release/python-386/
 2. 安装ffmpeg https://ffmpeg.org/download.html
 3. 执行pip install -r requirements.txt
-4. 修改config文件夹下的配置文件，root_config.json是全局设置，example.spec.json是直播间特定设置
-5. 执行python main.py <全局设置文件> <直播间特定设置文件> （如果需要录制多个直播间就开多个）
+4. 修改config文件夹下的配置文件config.json
+5. 执行python main2.py <配置文件> 
    
 ## 配置文件字段解释
 
-### 全局设置
+### 全局设置（root部分）
 - check_interval: 直播间开播状态检查间隔，单位为秒。由于B站API访问次数限制，建议不要小于30。如果要多开，建议适当调大。默认：100
 - global_path: 路径相关设置
   - data_path: 数据文件路径。默认："./"
@@ -26,7 +33,7 @@ FortuneDayssss/BilibiliUploader
   - max_retry: 最大重试次数。默认：10
 - enable_baiduyun：是否开启百度云功能。
 
-### 直播间特定设置
+### 直播间特定设置（spec部分，此部分是一个数组，如果需要同时监控多个直播间，依次添加至数组中即可）
 - room_id: 房间号
 - recorder: 录制器相关设置
   - keep_raw_record: 是否保留原始录像（flv）文件（录制器最后会合并所有flv文件导出mp4）。默认：true
