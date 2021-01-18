@@ -16,7 +16,7 @@ FortuneDayssss/BilibiliUploader
 2. 安装ffmpeg https://ffmpeg.org/download.html
 3. 执行pip install -r requirements.txt
 4. 修改config文件夹下的配置文件config.json
-5. 执行python main2.py <配置文件> 
+5. 执行python main.py <配置文件> 
    
 ## 配置文件字段解释
 
