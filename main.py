@@ -37,8 +37,6 @@ def proc(config: dict, record_dir: str, danmu_path: str) -> None:
         bp = ByPy()
         bp.upload(p.merged_file_path)
 
-
-
 if __name__ == "__main__":
     root_config_filename = sys.argv[1]
     spec_config_filename = sys.argv[2]
