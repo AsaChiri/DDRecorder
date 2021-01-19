@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import time
-from multiprocessing import Process,freeze_support
+from multiprocessing import freeze_support
 
 import utils
 from MainRunner import MainRunner
@@ -12,7 +12,8 @@ from MainRunner import MainRunner
 if __name__ == "__main__":
     freeze_support()
 
-    utils.add_path("./ffmpeg/bin")
+    if utils.is_windows():
+        utils.add_path("./ffmpeg/bin")
 
     if len(sys.argv) > 1:
         all_config_filename = sys.argv[1]

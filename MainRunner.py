@@ -2,7 +2,7 @@ import datetime
 import time
 from multiprocessing import Process
 import threading
-
+import logging
 import utils
 from BiliLive import BiliLive
 from BiliLiveRecorder import BiliLiveRecorder
@@ -38,13 +38,13 @@ class MainRunner(threading.Thread):
             rc = BiliVideoChecker(d['record']['bvid'],
                                   p.splits_dir, self.config)
             rc_process = Process(
-                target=rc.check,args=())
+                target=rc.check, args=())
             rc_process.start()
         if not self.config['spec']['uploader']['clips']['keep_clips_after_upload'] and d.get("clips", None) is not None:
             cc = BiliVideoChecker(d['clips']['bvid'],
                                   p.outputs_dir, self.config)
             cc_process = Process(
-                target=cc.check,args=())
+                target=cc.check, args=())
             cc_process.start()
 
         self.current_state = utils.state.UPLOADING_TO_BAIDUYUN
@@ -87,4 +87,6 @@ class MainRunner(threading.Thread):
                     time.sleep(self.config['root']['check_interval'])
         except KeyboardInterrupt:
             return
-    
+        except Exception as e:
+            logging.error(self.bl.generate_log(
+                'Error in Mainrunner:' + str(e)))

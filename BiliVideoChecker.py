@@ -50,11 +50,11 @@ class BiliVideoChecker:
             }).json()
             try:
                 if video_info['code'] == 0 and video_info['data']['state'] == 0:
-                    logging.info("稿件%s 已开放浏览，准备删除 %s",self.bvid, self.path)
+                    logging.info("稿件%s 已开放浏览，准备删除 %s", self.bvid, self.path)
                     utils.del_files_and_dir(self.path)
                     return
                 else:
-                    logging.info("稿件%s 未开放浏览",self.bvid)
+                    logging.info("稿件%s 未开放浏览", self.bvid)
                     time.sleep(self.check_interval)
             except KeyError:
                 pass

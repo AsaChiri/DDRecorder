@@ -10,10 +10,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class BaseLive(metaclass=abc.ABCMeta):
-    
 
     def __init__(self, config: dict):
-        
 
         default_headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -30,7 +28,7 @@ class BaseLive(metaclass=abc.ABCMeta):
         self.site_domain = ''
         self.config = config
         self.__last_check_time = datetime.datetime.now(
-            )+datetime.timedelta(seconds=-config['root']['check_interval'])
+        )+datetime.timedelta(seconds=-config['root']['check_interval'])
         self.__live_status = False
         self.__allowed_check_interval = datetime.timedelta(
             seconds=config['root']['check_interval'])

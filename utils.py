@@ -6,9 +6,11 @@ import ctypes
 from enum import Enum
 import prettytable as pt
 
+
 def is_windows() -> bool:
     plat_sys = platform.system()
     return plat_sys == "Windows"
+
 
 if is_windows():
     import winreg
@@ -94,6 +96,7 @@ def del_files_and_dir(dirs: str) -> None:
         os.remove(os.path.join(dirs, filename))
     os.rmdir(dirs)
 
+
 def refresh_reg() -> None:
     HWND_BROADCAST = 0xFFFF
     WM_SETTINGCHANGE = 0x1A
@@ -113,7 +116,7 @@ def add_path(path: str) -> None:
     path_value = winreg.QueryValueEx(path_key, 'Path')
     if path_value[0].find(abs_path) == -1:
         winreg.SetValueEx(path_key, "Path", 0,
-                        winreg.REG_EXPAND_SZ, path_value[0]+abs_path+";")
+                          winreg.REG_EXPAND_SZ, path_value[0]+abs_path+";")
         refresh_reg()
 
 
@@ -131,7 +134,7 @@ class state(Enum):
         if self.value == 0:
             return "摸鱼中"
         if self.value == 1:
-            return "开播了"
+            return "正在录制"
         if self.value == 2:
             return "正在处理视频"
         if self.value == 3:
@@ -142,11 +145,10 @@ class state(Enum):
 
 def print_log(runner_list: list) -> str:
     tb = pt.PrettyTable()
-    tb.field_names = ["TID","平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
+    tb.field_names = ["TID", "平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
     for runner in runner_list:
-        tb.add_row([runner.native_id,runner.bl.site_name, runner.bl.room_id, runner.bl.live_status, 
-            runner.current_state, runner.state_change_time])
+        tb.add_row([runner.native_id, runner.bl.site_name, runner.bl.room_id, "是" if runner.bl.live_status else "否",
+                    runner.current_state, runner.state_change_time])
     print(f"    DDRecorder  当前时间：{datetime.datetime.now()}\n")
     print(tb)
     print("\n")
-
