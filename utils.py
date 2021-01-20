@@ -5,7 +5,7 @@ import platform
 import ctypes
 from enum import Enum
 import prettytable as pt
-
+import threading
 
 def is_windows() -> bool:
     plat_sys = platform.system()
@@ -149,6 +149,6 @@ def print_log(runner_list: list) -> str:
     for runner in runner_list:
         tb.add_row([runner.native_id, runner.bl.site_name, runner.bl.room_id, "是" if runner.bl.live_status else "否",
                     runner.current_state, runner.state_change_time])
-    print(f"    DDRecorder  当前时间：{datetime.datetime.now()}\n")
+    print(f"    DDRecorder  当前时间：{datetime.datetime.now()} 正在工作线程数：{threading.activeCount()}\n")
     print(tb)
     print("\n")

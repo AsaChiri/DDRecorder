@@ -2,7 +2,7 @@ import datetime
 import logging
 import os
 import time
-
+import threading
 import requests
 import urllib3
 
@@ -11,7 +11,7 @@ import utils
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-class BiliVideoChecker:
+class BiliVideoChecker(threading.Thread):
     def __init__(self, bvid: str, path: str, config: dict):
         default_headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -38,7 +38,7 @@ class BiliVideoChecker:
                 url, headers=self.headers, params=params, data=data, verify=False)
         return connection
 
-    def check(self) -> None:
+    def run(self) -> None:
         logging.basicConfig(level=utils.get_log_level(self.config),
                             format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                             datefmt='%a, %d %b %Y %H:%M:%S',

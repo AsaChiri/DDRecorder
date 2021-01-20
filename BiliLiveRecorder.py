@@ -2,7 +2,6 @@ import datetime
 import logging
 import os
 import re
-
 import requests
 import urllib3
 
@@ -14,7 +13,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class BiliLiveRecorder(BiliLive):
     def __init__(self, config: dict, global_start: datetime.datetime):
-        super().__init__(config)
+        BiliLive.__init__(self,config)
         self.record_dir = utils.init_record_dir(
             self.room_id, global_start, config['root']['global_path']['data_path'])
 
@@ -60,4 +59,4 @@ class BiliLiveRecorder(BiliLive):
                     break
             except Exception as e:
                 logging.error(self.generate_log(
-                    'Error while checking or recording:' + str(e)))
+                    'Error while checking or recording:' + str(e)+traceback.format_exc()))

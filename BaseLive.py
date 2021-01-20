@@ -44,7 +44,7 @@ class BaseLive(metaclass=abc.ABCMeta):
                     url, headers=self.headers, params=params, data=data, verify=False, timeout=5)
             return connection
         except requests.exceptions.RequestException as e:
-            logging.error(self.generate_log("Request Error"+str(e)))
+            logging.error(self.generate_log("Request Error"+str(e)+traceback.format_exc()))
 
     @abc.abstractmethod
     def get_room_info(self):
