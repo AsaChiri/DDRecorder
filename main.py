@@ -47,6 +47,7 @@ if __name__ == "__main__":
 
     for tr in runner_list:
         tr.start()
+        time.sleep(10)
     
     while True:
         utils.print_log(runner_list)
