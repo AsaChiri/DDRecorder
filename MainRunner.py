@@ -81,7 +81,6 @@ class MainRunner(threading.Thread):
                     self.prev_live_status = self.bl.live_status
                     proc_thread = _thread.start_new_thread(self.proc, (
                         self.blr.record_dir, self.bdr.log_filename,))
-                    proc_thread.setDaemon(True)
                     proc_thread.start()
                 else:
                     time.sleep(self.config['root']['check_interval'])
