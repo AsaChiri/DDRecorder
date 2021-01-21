@@ -21,7 +21,8 @@ FortuneDayssss/BilibiliUploader
 ## 配置文件字段解释
 
 ### 全局设置（root部分）
-- check_interval: 直播间开播状态检查间隔，单位为秒。由于B站API访问次数限制，建议不要小于30。如果要多开，建议适当调大。默认：100
+- check_interval: 直播间开播状态检查间隔，单位为秒，每个监控直播间单独计数，因此如果监控直播间较多，建议适当调大。由于B站API访问次数限制，建议不要小于30。默认：100
+- print_interval：控制台消息打印间隔，单位为秒。
 - global_path: 路径相关设置
   - data_path: 数据文件路径。默认："./"
 - logger: 日志相关设置
@@ -29,6 +30,7 @@ FortuneDayssss/BilibiliUploader
   - log_level: 日志级别，可选DEBUG\INFO\WARN
 - request_header: 请求时使用的头。代码中已经包含了一个默认的，在这里进行调整将会覆盖默认值，如无必要请留空。
 - uploader: 上传器相关设置
+  - upload_by_edit：通过编辑稿件的方法上传多P切片，可以让后续分P上传时让前面的分P进入审核队列，加快开放浏览的速度
   - thread_pool_workers: 上传时的线程池大小。默认：1
   - max_retry: 最大重试次数。默认：10
 - enable_baiduyun：是否开启百度云功能。
@@ -54,7 +56,7 @@ FortuneDayssss/BilibiliUploader
   - record: 录播上传设置
     - upload_record: 是否上传录播。默认：true
     - keep_record_after_upload: 是否在上传过审后保留录播。默认：true
-    - split_interval: 录播划分间隔，单位秒。由于B站无法一次上传大文件，因此长录播需要分片才能上传。默认：3600
+    - split_interval: 录播划分间隔，单位秒。由于B站无法一次上传大文件，因此长录播需要分片才能上传。默认：3600。如设为0，表示不划分，如此请保证账号具有超大文件权限。
     - title：上传视频的标题，可以用 {date} 标识日期
     - tid：分区编号，可在 https://github.com/FortuneDayssss/BilibiliUploader/wiki/Bilibili%E5%88%86%E5%8C%BA%E5%88%97%E8%A1%A8 查询
     - tags：上传视频的标签

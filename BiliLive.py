@@ -6,6 +6,7 @@ from BaseLive import BaseLive
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 class BiliLive(BaseLive):
     def __init__(self, config: dict):
         super().__init__(config)

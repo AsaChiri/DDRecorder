@@ -10,10 +10,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class BaseLive(metaclass=abc.ABCMeta):
-    
 
     def __init__(self, config: dict):
-        
 
         default_headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -30,7 +28,7 @@ class BaseLive(metaclass=abc.ABCMeta):
         self.site_domain = ''
         self.config = config
         self.__last_check_time = datetime.datetime.now(
-            )+datetime.timedelta(seconds=-config['root']['check_interval'])
+        )+datetime.timedelta(seconds=-config['root']['check_interval'])
         self.__live_status = False
         self.__allowed_check_interval = datetime.timedelta(
             seconds=config['root']['check_interval'])
@@ -46,7 +44,7 @@ class BaseLive(metaclass=abc.ABCMeta):
                     url, headers=self.headers, params=params, data=data, verify=False, timeout=5)
             return connection
         except requests.exceptions.RequestException as e:
-            logging.error(self.generate_log("Request Error"+str(e)))
+            logging.error(self.generate_log("Request Error"+str(e)+traceback.format_exc()))
 
     @abc.abstractmethod
     def get_room_info(self):

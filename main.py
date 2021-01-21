@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import time
-from multiprocessing import Process,freeze_support
+from multiprocessing import freeze_support
 
 import utils
 from MainRunner import MainRunner
@@ -12,15 +12,21 @@ from MainRunner import MainRunner
 if __name__ == "__main__":
     freeze_support()
 
-    utils.add_path("./ffmpeg/bin")
+    if utils.is_windows():
+        utils.add_path("./ffmpeg/bin")
 
-    if len(sys.argv) > 1:
-        all_config_filename = sys.argv[1]
-        with open(all_config_filename, "r", encoding="UTF-8") as f:
-            all_config = json.load(f)
-    else:
-        with open("config.json", "r", encoding="UTF-8") as f:
-            all_config = json.load(f)
+    try:
+        if len(sys.argv) > 1:
+            all_config_filename = sys.argv[1]
+            with open(all_config_filename, "r", encoding="UTF-8") as f:
+                all_config = json.load(f)
+        else:
+            with open("config.json", "r", encoding="UTF-8") as f:
+                all_config = json.load(f)
+    except Exception as e:
+        print("解析配置文件时出现错误，请检查配置文件！")
+        print("错误详情："+str(e))
+        os.system('pause')
 
     utils.check_and_create_dir(all_config['root']['global_path']['data_path'])
     utils.check_and_create_dir(all_config['root']['logger']['log_path'])
