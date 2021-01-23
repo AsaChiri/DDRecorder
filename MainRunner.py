@@ -52,9 +52,10 @@ class MainRunner(threading.Thread):
             from bypy import ByPy
             bp = ByPy()
             bp.upload(p.merged_file_path)
-
-        self.current_state = utils.state.WAITING_FOR_LIVE_START
-        self.state_change_time = datetime.datetime.now()
+            
+        if self.current_state != utils.state.WAITING_FOR_LIVE_START:
+            self.current_state = utils.state.WAITING_FOR_LIVE_START
+            self.state_change_time = datetime.datetime.now()
 
     def run(self):
         try:
