@@ -5,7 +5,7 @@ import logging
 import os
 import zlib
 from aiowebsocket.converses import AioWebSocket
-
+import traceback
 import utils
 from BiliLive import BiliLive
 
