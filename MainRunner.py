@@ -1,17 +1,18 @@
-import datetime
-import time
-from multiprocessing import Process
 import _thread
-import threading
+import datetime
 import logging
+import threading
+import time
+import traceback
+from multiprocessing import Process
+
 import utils
 from BiliLive import BiliLive
 from BiliLiveRecorder import BiliLiveRecorder
+from BiliVideoChecker import BiliVideoChecker
 from DanmuRecorder import BiliDanmuRecorder
 from Processor import Processor
 from Uploader import Uploader
-from BiliVideoChecker import BiliVideoChecker
-import traceback
 
 
 class MainRunner(threading.Thread):
@@ -23,7 +24,7 @@ class MainRunner(threading.Thread):
         self.state_change_time = datetime.datetime.now()
         if self.config['root']['enable_baiduyun']:
             from bypy import ByPy
-            bp = ByPy()
+            _ = ByPy()
         self.bl = BiliLive(self.config)
         self.blr = None
         self.bdr = None
@@ -50,9 +51,9 @@ class MainRunner(threading.Thread):
             self.current_state = utils.state.UPLOADING_TO_BAIDUYUN
             self.state_change_time = datetime.datetime.now()
             from bypy import ByPy
-            bp = ByPy()
+                bp = ByPy()
             bp.upload(p.merged_file_path)
-            
+
         if self.current_state != utils.state.WAITING_FOR_LIVE_START:
             self.current_state = utils.state.WAITING_FOR_LIVE_START
             self.state_change_time = datetime.datetime.now()

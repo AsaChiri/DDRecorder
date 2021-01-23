@@ -5,7 +5,6 @@ import time
 import threading
 import requests
 import urllib3
-import traceback
 import utils
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -13,6 +12,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class BiliVideoChecker(threading.Thread):
     def __init__(self, bvid: str, path: str, config: dict):
+        threading.Thread.__init__(self)
         default_headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',

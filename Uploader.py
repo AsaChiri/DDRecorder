@@ -1,6 +1,7 @@
 import datetime
 import os
 import logging
+import traceback
 
 from bilibiliuploader.bilibiliuploader import BilibiliUploader
 from bilibiliuploader.core import VideoPart
@@ -65,66 +66,70 @@ class Uploader(BiliLive):
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
                             filemode='a')
         return_dict = {}
-        if self.config['spec']['uploader']['clips']['upload_clips']:
-            output_parts = []
-            datestr = global_start.strftime(
-                '%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
-            filelists = os.listdir(self.output_dir)
-            for filename in filelists:
-                if os.path.getsize(os.path.join(self.output_dir, filename)) < 1024*1024:
-                    continue
-                title = os.path.splitext(filename)[0].split("_")[-1]
-                output_parts.append(VideoPart(
-                    path=os.path.join(self.output_dir, filename),
-                    title=title,
-                    desc=self.config['spec']['uploader']['clips']['desc'].format(
-                        date=datestr),
-                ))
+        try:
+            if self.config['spec']['uploader']['clips']['upload_clips']:
+                output_parts = []
+                datestr = global_start.strftime(
+                    '%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
+                filelists = os.listdir(self.output_dir)
+                for filename in filelists:
+                    if os.path.getsize(os.path.join(self.output_dir, filename)) < 1024*1024:
+                        continue
+                    title = os.path.splitext(filename)[0].split("_")[-1]
+                    output_parts.append(VideoPart(
+                        path=os.path.join(self.output_dir, filename),
+                        title=title,
+                        desc=self.config['spec']['uploader']['clips']['desc'].format(
+                            date=datestr),
+                    ))
 
-            avid, bvid = upload(self.uploader, output_parts,
-                                title=self.config['spec']['uploader']['clips']['title'].format(
-                                    date=datestr),
-                                tid=self.config['spec']['uploader']['clips']['tid'],
-                                tags=self.config['spec']['uploader']['clips']['tags'],
-                                desc=self.config['spec']['uploader']['clips']['desc'].format(
-                                    date=datestr),
-                                source="https://live.bilibili.com/"+self.room_id,
-                                thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
-                                max_retry=self.config['root']['uploader']['max_retry'],
-                                upload_by_edit=self.config['root']['uploader']['upload_by_edit'])
-            return_dict["clips"] = {
-                "avid": avid,
-                "bvid": bvid
-            }
-        if self.config['spec']['uploader']['record']['upload_record']:
-            splits_parts = []
-            datestr = global_start.strftime(
-                '%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
-            filelists = os.listdir(self.splits_dir)
-            for filename in filelists:
-                if os.path.getsize(os.path.join(self.splits_dir, filename)) < 1024*1024:
-                    continue
-                title = filename
-                splits_parts.append(VideoPart(
-                    path=os.path.join(self.splits_dir, filename),
-                    title=title,
-                    desc=self.config['spec']['uploader']['record']['desc'].format(
-                        date=datestr),
-                ))
+                avid, bvid = upload(self.uploader, output_parts,
+                                    title=self.config['spec']['uploader']['clips']['title'].format(
+                                        date=datestr),
+                                    tid=self.config['spec']['uploader']['clips']['tid'],
+                                    tags=self.config['spec']['uploader']['clips']['tags'],
+                                    desc=self.config['spec']['uploader']['clips']['desc'].format(
+                                        date=datestr),
+                                    source="https://live.bilibili.com/"+self.room_id,
+                                    thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
+                                    max_retry=self.config['root']['uploader']['max_retry'],
+                                    upload_by_edit=self.config['root']['uploader']['upload_by_edit'])
+                return_dict["clips"] = {
+                    "avid": avid,
+                    "bvid": bvid
+                }
+            if self.config['spec']['uploader']['record']['upload_record']:
+                splits_parts = []
+                datestr = global_start.strftime(
+                    '%Y{y}%m{m}%d{d}').format(y='年', m='月', d='日')
+                filelists = os.listdir(self.splits_dir)
+                for filename in filelists:
+                    if os.path.getsize(os.path.join(self.splits_dir, filename)) < 1024*1024:
+                        continue
+                    title = filename
+                    splits_parts.append(VideoPart(
+                        path=os.path.join(self.splits_dir, filename),
+                        title=title,
+                        desc=self.config['spec']['uploader']['record']['desc'].format(
+                            date=datestr),
+                    ))
 
-            avid, bvid = upload(self.uploader, splits_parts,
-                                title=self.config['spec']['uploader']['record']['title'].format(
-                                    date=datestr),
-                                tid=self.config['spec']['uploader']['record']['tid'],
-                                tags=self.config['spec']['uploader']['record']['tags'],
-                                desc=self.config['spec']['uploader']['record']['desc'].format(
-                                    date=datestr),
-                                source="https://live.bilibili.com/"+self.room_id,
-                                thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
-                                max_retry=self.config['root']['uploader']['max_retry'],
-                                upload_by_edit=self.config['root']['uploader']['upload_by_edit'])
-            return_dict["record"] = {
-                "avid": avid,
-                "bvid": bvid
-            }
+                avid, bvid = upload(self.uploader, splits_parts,
+                                    title=self.config['spec']['uploader']['record']['title'].format(
+                                        date=datestr),
+                                    tid=self.config['spec']['uploader']['record']['tid'],
+                                    tags=self.config['spec']['uploader']['record']['tags'],
+                                    desc=self.config['spec']['uploader']['record']['desc'].format(
+                                        date=datestr),
+                                    source="https://live.bilibili.com/"+self.room_id,
+                                    thread_pool_workers=self.config['root']['uploader']['thread_pool_workers'],
+                                    max_retry=self.config['root']['uploader']['max_retry'],
+                                    upload_by_edit=self.config['root']['uploader']['upload_by_edit'])
+                return_dict["record"] = {
+                    "avid": avid,
+                    "bvid": bvid
+                }
+        except Exception as e:
+            logging.error(self.generate_log(
+                'Error while uploading:' + str(e)+traceback.format_exc()))
         return return_dict

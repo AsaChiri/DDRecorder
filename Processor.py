@@ -177,7 +177,7 @@ class Processor(BiliLive):
             shutil.copy2(self.merged_file_path, os.path.join(
                 self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_0.mp4"))
             return
-            
+
         duration = float(ffmpeg.probe(self.merged_file_path)
                          ['format']['duration'])
         num_splits = int(duration) // split_interval + 1
