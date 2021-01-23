@@ -51,7 +51,7 @@ class MainRunner(threading.Thread):
             self.current_state = utils.state.UPLOADING_TO_BAIDUYUN
             self.state_change_time = datetime.datetime.now()
             from bypy import ByPy
-                bp = ByPy()
+            bp = ByPy()
             bp.upload(p.merged_file_path)
 
         if self.current_state != utils.state.WAITING_FOR_LIVE_START:
