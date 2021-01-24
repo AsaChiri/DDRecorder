@@ -7,6 +7,7 @@ from enum import Enum
 import prettytable as pt
 import threading
 
+
 def is_windows() -> bool:
     plat_sys = platform.system()
     return plat_sys == "Windows"
@@ -142,13 +143,17 @@ class state(Enum):
         if self.value == 4:
             return "正在上传至百度网盘"
 
+    def __int__(self):
+        return self.value
+
 
 def print_log(runner_list: list) -> str:
     tb = pt.PrettyTable()
     tb.field_names = ["TID", "平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
     for runner in runner_list:
-        tb.add_row([runner.native_id, runner.bl.site_name, runner.bl.room_id, "是" if runner.bl.live_status else "否",
-                    runner.current_state, runner.state_change_time])
-    print(f"    DDRecorder  当前时间：{datetime.datetime.now()} 正在工作线程数：{threading.activeCount()}\n")
+        tb.add_row([runner.native_id, runner.mr.bl.site_name, runner.mr.bl.room_id, "是" if runner.mr.bl.live_status else "否",
+                    str(state(runner.mr.current_state.value)), datetime.datetime.fromtimestamp(runner.mr.state_change_time.value)])
+    print(
+        f"    DDRecorder  当前时间：{datetime.datetime.now()} 正在工作线程数：{threading.activeCount()}\n")
     print(tb)
     print("\n")

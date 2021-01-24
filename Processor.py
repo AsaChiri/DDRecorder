@@ -111,13 +111,13 @@ class Processor(BiliLive):
         self.global_start = utils.get_global_start_from_records(
             self.record_dir)
         self.merge_conf_path = utils.get_merge_conf_path(
-            self.room_id, self.global_start, config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, config['root']['data_path'])
         self.merged_file_path = utils.get_mergd_filename(
-            self.room_id, self.global_start, config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, config['root']['data_path'])
         self.outputs_dir = utils.init_outputs_dir(
-            self.room_id, self.global_start, config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, config['root']['data_path'])
         self.splits_dir = utils.init_splits_dir(
-            self.room_id, self.global_start, self.config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, self.config['root']['data_path'])
         self.times = []
         self.live_start = self.global_start
         self.live_duration = 0

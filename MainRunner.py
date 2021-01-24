@@ -4,7 +4,7 @@ import logging
 import threading
 import time
 import traceback
-from multiprocessing import Process
+from multiprocessing import Process, Value
 
 import utils
 from BiliLive import BiliLive
@@ -15,13 +15,13 @@ from Processor import Processor
 from Uploader import Uploader
 
 
-class MainRunner(threading.Thread):
+class MainRunner():
     def __init__(self, config):
-        threading.Thread.__init__(self)
         self.config = config
         self.prev_live_status = False
-        self.current_state = utils.state.WAITING_FOR_LIVE_START
-        self.state_change_time = datetime.datetime.now()
+        self.current_state = Value(
+            'i', int(utils.state.WAITING_FOR_LIVE_START))
+        self.state_change_time = Value('f', time.time())
         if self.config['root']['enable_baiduyun']:
             from bypy import ByPy
             _ = ByPy()
@@ -29,41 +29,41 @@ class MainRunner(threading.Thread):
         self.blr = None
         self.bdr = None
 
-    def proc(self, record_dir: str, danmu_path: str) -> None:
-        p = Processor(self.config, record_dir, danmu_path)
+    def proc(self, config: dict, record_dir: str, danmu_path: str, current_state, state_change_time) -> None:
+        p = Processor(config, record_dir, danmu_path)
         p.run()
-        
-        if self.config['spec']['uploader']['record']['upload_record'] or self.config['spec']['uploader']['clips']['upload_clips']:
-            self.current_state = utils.state.UPLOADING_TO_BILIBILI
-            self.state_change_time = datetime.datetime.now()
-            u = Uploader(p.outputs_dir, p.splits_dir, self.config)
+
+        if config['spec']['uploader']['record']['upload_record'] or config['spec']['uploader']['clips']['upload_clips']:
+            current_state.value = int(utils.state.UPLOADING_TO_BILIBILI)
+            state_change_time.value = time.time()
+            u = Uploader(p.outputs_dir, p.splits_dir, config)
             d = u.upload(p.global_start)
-            if not self.config['spec']['uploader']['record']['keep_record_after_upload'] and d.get("record", None) is not None:
+            if not config['spec']['uploader']['record']['keep_record_after_upload'] and d.get("record", None) is not None:
                 rc = BiliVideoChecker(d['record']['bvid'],
-                                    p.splits_dir, self.config)
+                                      p.splits_dir, config)
                 rc.start()
-            if not self.config['spec']['uploader']['clips']['keep_clips_after_upload'] and d.get("clips", None) is not None:
+            if not config['spec']['uploader']['clips']['keep_clips_after_upload'] and d.get("clips", None) is not None:
                 cc = BiliVideoChecker(d['clips']['bvid'],
-                                    p.outputs_dir, self.config)
+                                      p.outputs_dir, config)
                 cc.start()
-        
-        if self.config['root']['enable_baiduyun'] and self.config['spec']['backup']:
-            self.current_state = utils.state.UPLOADING_TO_BAIDUYUN
-            self.state_change_time = datetime.datetime.now()
+
+        if config['root']['enable_baiduyun'] and config['spec']['backup']:
+            current_state.value = int(utils.state.UPLOADING_TO_BAIDUYUN)
+            state_change_time.value = time.time()
             from bypy import ByPy
             bp = ByPy()
             bp.upload(p.merged_file_path)
 
-        if self.current_state != utils.state.WAITING_FOR_LIVE_START:
-            self.current_state = utils.state.WAITING_FOR_LIVE_START
-            self.state_change_time = datetime.datetime.now()
+        if current_state.value != int(utils.state.LIVE_STARTED):
+            current_state.value = int(utils.state.WAITING_FOR_LIVE_START)
+            state_change_time.value = time.time()
 
     def run(self):
         try:
             while True:
                 if not self.prev_live_status and self.bl.live_status:
-                    self.current_state = utils.state.LIVE_STARTED
-                    self.state_change_time = datetime.datetime.now()
+                    self.current_state.value = int(utils.state.LIVE_STARTED)
+                    self.state_change_time.value = time.time()
                     self.prev_live_status = self.bl.live_status
                     start = datetime.datetime.now()
                     self.blr = BiliLiveRecorder(self.config, start)
@@ -78,12 +78,12 @@ class MainRunner(threading.Thread):
                     record_process.join()
                     danmu_process.join()
 
-                    self.current_state = utils.state.PROCESSING_RECORDS
-                    self.state_change_time = datetime.datetime.now()
+                    self.current_state.value = int(utils.state.PROCESSING_RECORDS)
+                    self.state_change_time.value = time.time()
                     self.prev_live_status = self.bl.live_status
-                    proc_thread = _thread.start_new_thread(self.proc, (
-                        self.blr.record_dir, self.bdr.log_filename,))
-                    proc_thread.start()
+                    proc_process = Process(target=self.proc, args=(
+                        self.config, self.blr.record_dir, self.bdr.log_filename, self.current_state, self.state_change_time))
+                    proc_process.start()
                 else:
                     time.sleep(self.config['root']['check_interval'])
         except KeyboardInterrupt:
@@ -91,3 +91,11 @@ class MainRunner(threading.Thread):
         except Exception as e:
             logging.error('Error in Mainrunner:' +
                           str(e)+traceback.format_exc())
+
+class MainThreadRunner(threading.Thread):
+    def __init__(self, config):
+        threading.Thread.__init__(self)
+        self.mr = MainRunner(config)
+
+    def run(self):
+        self.mr.run()

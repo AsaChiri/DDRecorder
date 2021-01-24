@@ -14,7 +14,7 @@ class BiliDanmuRecorder(BiliLive):
     def __init__(self, config: dict, global_start: datetime.datetime):
         BiliLive.__init__(self, config)
         self.log_filename = utils.init_danmu_log_file(
-            self.room_id, global_start, config['root']['global_path']['data_path'])
+            self.room_id, global_start, config['root']['data_path'])
         self.room_server_api = 'wss://broadcastlv.chat.bilibili.com/sub'
 
     def __log_danmu(self, body: str) -> None:

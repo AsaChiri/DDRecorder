@@ -2,9 +2,7 @@
     "root": {
         "check_interval": 60,
         "print_interval": 10,
-        "global_path": {
-            "data_path": "./"
-        },
+        "data_path": "./",
         "logger": {
             "log_path": "./log",
             "log_level": "DEBUG"
