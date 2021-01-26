@@ -4,18 +4,17 @@ import json
 import logging
 import os
 import zlib
-
 from aiowebsocket.converses import AioWebSocket
-
+import traceback
 import utils
 from BiliLive import BiliLive
 
 
 class BiliDanmuRecorder(BiliLive):
     def __init__(self, config: dict, global_start: datetime.datetime):
-        super().__init__(config)
+        BiliLive.__init__(self, config)
         self.log_filename = utils.init_danmu_log_file(
-            self.room_id, global_start, config['root']['global_path']['data_path'])
+            self.room_id, global_start, config['root']['data_path'])
         self.room_server_api = 'wss://broadcastlv.chat.bilibili.com/sub'
 
     def __log_danmu(self, body: str) -> None:
@@ -64,8 +63,12 @@ class BiliDanmuRecorder(BiliLive):
                             handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "DanmuRecoder_"+datetime.datetime.now(
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), "a", encoding="utf-8")])
         try:
-            _ = open(self.log_filename, 'a', encoding="utf-8") # 提前创建弹幕记录文件避免因为没有弹幕而失败
-            asyncio.get_event_loop().run_until_complete(self.__startup())
+            # 提前创建弹幕记录文件避免因为没有弹幕而失败
+            _ = open(self.log_filename, 'a', encoding="utf-8")
+            new_loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(new_loop)
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(self.__startup())
         except KeyboardInterrupt:
             logging.info(self.generate_log("键盘指令退出"))
 
@@ -123,4 +126,4 @@ class BiliDanmuRecorder(BiliLive):
                     logging.info(self.generate_log('[OTHER] '+jd['cmd']))
             except Exception as e:
                 logging.error(self.generate_log(
-                    'Error while parsing danmu data:'+str(e)))
+                    'Error while parsing danmu data:'+str(e)+traceback.format_exc()))

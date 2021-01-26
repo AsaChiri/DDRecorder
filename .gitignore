@@ -127,5 +127,4 @@ dmypy.json
 data/
 log/
 config/*
-!config/example.spec.json
-!config/root_config.json
+!config/config.json

@@ -1,6 +1,20 @@
 import os
 import datetime
 import logging
+import platform
+import ctypes
+from enum import Enum
+import prettytable as pt
+import threading
+
+
+def is_windows() -> bool:
+    plat_sys = platform.system()
+    return plat_sys == "Windows"
+
+
+if is_windows():
+    import winreg
 
 
 def get_log_level(config: dict) -> int:
@@ -13,6 +27,7 @@ def get_log_level(config: dict) -> int:
     if config['root']['logger']['log_level'] == 'ERROR':
         return logging.ERROR
     return logging.INFO
+
 
 def check_and_create_dir(dirs: str) -> None:
     if not os.path.exists(dirs):
@@ -81,3 +96,64 @@ def del_files_and_dir(dirs: str) -> None:
     for filename in os.listdir(dirs):
         os.remove(os.path.join(dirs, filename))
     os.rmdir(dirs)
+
+
+def refresh_reg() -> None:
+    HWND_BROADCAST = 0xFFFF
+    WM_SETTINGCHANGE = 0x1A
+
+    SMTO_ABORTIFHUNG = 0x0002
+
+    result = ctypes.c_long()
+    SendMessageTimeoutW = ctypes.windll.user32.SendMessageTimeoutW
+    SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0,
+                        u'Environment', SMTO_ABORTIFHUNG, 5000, ctypes.byref(result))
+
+
+def add_path(path: str) -> None:
+    abs_path = os.path.abspath(path)
+    path_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                              'Environment', 0, winreg.KEY_ALL_ACCESS)
+    path_value = winreg.QueryValueEx(path_key, 'Path')
+    if path_value[0].find(abs_path) == -1:
+        winreg.SetValueEx(path_key, "Path", 0,
+                          winreg.REG_EXPAND_SZ, path_value[0]+abs_path+";")
+        refresh_reg()
+
+
+class state(Enum):
+    ERROR = -1
+    WAITING_FOR_LIVE_START = 0
+    LIVE_STARTED = 1
+    PROCESSING_RECORDS = 2
+    UPLOADING_TO_BILIBILI = 3
+    UPLOADING_TO_BAIDUYUN = 4
+
+    def __str__(self):
+        if self.value == -1:
+            return "错误！"
+        if self.value == 0:
+            return "摸鱼中"
+        if self.value == 1:
+            return "正在录制"
+        if self.value == 2:
+            return "正在处理视频"
+        if self.value == 3:
+            return "正在上传至Bilibili"
+        if self.value == 4:
+            return "正在上传至百度网盘"
+
+    def __int__(self):
+        return self.value
+
+
+def print_log(runner_list: list) -> str:
+    tb = pt.PrettyTable()
+    tb.field_names = ["TID", "平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
+    for runner in runner_list:
+        tb.add_row([runner.native_id, runner.mr.bl.site_name, runner.mr.bl.room_id, "是" if runner.mr.bl.live_status else "否",
+                    str(state(runner.mr.current_state.value)), datetime.datetime.fromtimestamp(runner.mr.state_change_time.value)])
+    print(
+        f"    DDRecorder  当前时间：{datetime.datetime.now()} 正在工作线程数：{threading.activeCount()}\n")
+    print(tb)
+    print("\n")

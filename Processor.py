@@ -85,15 +85,15 @@ def count(danmus: Dict[datetime.datetime, List[str]], live_start: datetime.datet
     return return_dict
 
 
-def flv2ts(input_file: str, output_file: str, ffmpeg_path: str = "ffmpeg") -> subprocess.CompletedProcess:
+def flv2ts(input_file: str, output_file: str) -> subprocess.CompletedProcess:
     ret = subprocess.run(
-        f"{ffmpeg_path} -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -f mpegts {output_file}", shell=True, check=True)
+        f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -f mpegts {output_file}", shell=True, check=True)
     return ret
 
 
-def concat(merge_conf_path: str, merged_file_path: str, ffmpeg_path: str = "ffmpeg") -> subprocess.CompletedProcess:
+def concat(merge_conf_path: str, merged_file_path: str) -> subprocess.CompletedProcess:
     ret = subprocess.run(
-        f"{ffmpeg_path} -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True)
+        f"ffmpeg -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True)
     return ret
 
 
@@ -111,13 +111,13 @@ class Processor(BiliLive):
         self.global_start = utils.get_global_start_from_records(
             self.record_dir)
         self.merge_conf_path = utils.get_merge_conf_path(
-            self.room_id, self.global_start, config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, config['root']['data_path'])
         self.merged_file_path = utils.get_mergd_filename(
-            self.room_id, self.global_start, config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, config['root']['data_path'])
         self.outputs_dir = utils.init_outputs_dir(
-            self.room_id, self.global_start, config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, config['root']['data_path'])
         self.splits_dir = utils.init_splits_dir(
-            self.room_id, self.global_start, self.config['root']['global_path']['data_path'])
+            self.room_id, self.global_start, self.config['root']['data_path'])
         self.times = []
         self.live_start = self.global_start
         self.live_duration = 0
@@ -137,7 +137,7 @@ class Processor(BiliLive):
                     ts_path = os.path.splitext(os.path.join(
                         self.record_dir, filename))[0]+".ts"
                     _ = flv2ts(os.path.join(
-                        self.record_dir, filename), ts_path, self.config['root']['global_path']['ffmpeg_path'])
+                        self.record_dir, filename), ts_path)
                     if not self.config['spec']['recorder']['keep_raw_record']:
                         os.remove(os.path.join(self.record_dir, filename))
                     # ts_path = os.path.join(self.record_dir, filename)
@@ -147,8 +147,7 @@ class Processor(BiliLive):
                     self.times.append((start_time, duration))
                     f.write(
                         f"file '{ts_path}'\n")
-        _ = concat(self.merge_conf_path, self.merged_file_path,
-                   self.config['root']['global_path']['ffmpeg_path'])
+        _ = concat(self.merge_conf_path, self.merged_file_path)
         self.times.sort(key=lambda x: x[0])
         self.live_start = self.times[0][0]
         self.live_duration = (
@@ -178,7 +177,7 @@ class Processor(BiliLive):
             shutil.copy2(self.merged_file_path, os.path.join(
                 self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_0.mp4"))
             return
-            
+
         duration = float(ffmpeg.probe(self.merged_file_path)
                          ['format']['duration'])
         num_splits = int(duration) // split_interval + 1
