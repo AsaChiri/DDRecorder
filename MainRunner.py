@@ -61,10 +61,7 @@ class MainRunner():
     def run(self):
         try:
             while True:
-                if not self.prev_live_status and self.bl.live_status:
-                    self.current_state.value = int(utils.state.LIVE_STARTED)
-                    self.state_change_time.value = time.time()
-                    self.prev_live_status = self.bl.live_status
+                if not self.prev_live_status and self.bl.live_status:                 
                     start = datetime.datetime.now()
                     self.blr = BiliLiveRecorder(self.config, start)
                     self.bdr = BiliDanmuRecorder(self.config, start)
@@ -74,6 +71,9 @@ class MainRunner():
                         target=self.bdr.run)
                     danmu_process.start()
                     record_process.start()
+                    self.current_state.value = int(utils.state.LIVE_STARTED)
+                    self.state_change_time.value = time.time()
+                    self.prev_live_status = self.bl.live_status
 
                     record_process.join()
                     danmu_process.join()
