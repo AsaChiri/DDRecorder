@@ -14,15 +14,21 @@ from BiliLive import BiliLive
 
 
 def __parse_line(txt: str) -> Tuple[datetime.datetime, str]:
-    time = re.match(r'\[(.*?)\](.*)', txt).group(1)
-    text = re.match(r'\[(.*?)\](.*)', txt).group(2)
-    return datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S'), text
+    r = re.match(r'\[(.*?)\](.*)', txt)
+    if r is not None:
+        time = r.group(1)
+        text = r.group(2)
+        return datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S'), text
+    else:
+        return None,""
 
 
 def parse_lines(lines: List[str]) -> Dict[datetime.datetime, List[str]]:
     return_dict = {}
     for line in lines:
         time, text = __parse_line(line)
+        if time is None:
+            continue
         if return_dict.get(time, None) is None:
             return_dict[time] = [text]
         else:

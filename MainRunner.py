@@ -50,9 +50,13 @@ class MainRunner():
         if config['root']['enable_baiduyun'] and config['spec']['backup']:
             current_state.value = int(utils.state.UPLOADING_TO_BAIDUYUN)
             state_change_time.value = time.time()
-            from bypy import ByPy
-            bp = ByPy()
-            bp.upload(p.merged_file_path)
+            try:
+                from bypy import ByPy
+                bp = ByPy()
+                bp.upload(p.merged_file_path)
+            except Exception as e:
+                logging.error('Error when uploading to Baiduyun:' +
+                          str(e)+traceback.format_exc())
 
         if current_state.value != int(utils.state.LIVE_STARTED):
             current_state.value = int(utils.state.WAITING_FOR_LIVE_START)
@@ -73,14 +77,14 @@ class MainRunner():
                     record_process.start()
                     self.current_state.value = int(utils.state.LIVE_STARTED)
                     self.state_change_time.value = time.time()
-                    self.prev_live_status = self.bl.live_status
+                    self.prev_live_status = True
 
                     record_process.join()
                     danmu_process.join()
 
                     self.current_state.value = int(utils.state.PROCESSING_RECORDS)
                     self.state_change_time.value = time.time()
-                    self.prev_live_status = self.bl.live_status
+                    self.prev_live_status = False
                     proc_process = Process(target=self.proc, args=(
                         self.config, self.blr.record_dir, self.bdr.log_filename, self.current_state, self.state_change_time))
                     proc_process.start()

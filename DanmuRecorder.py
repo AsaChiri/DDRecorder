@@ -118,12 +118,12 @@ class BiliDanmuRecorder(BiliLive):
                     logging.info(self.generate_log(
                         f"[Notice] UID:{jd['data']['uid']} Username:{jd['data']['uname']} enters the live room\n"))
                 elif jd['cmd'] == 'SUPER_CHAT_MESSAGE':
-                    if jd['info'][1] != "":
+                    if jd['data']['message'] != "":
                         self.__log_danmu(jd['data']['message'])
                     logging.info(self.generate_log(
                         f"[Notice] UID:{jd['data']['uid']} sends a superchat:{jd['data']['message']}\n"))
                 else:
-                    logging.info(self.generate_log('[OTHER] '+jd['cmd']))
+                    logging.info(self.generate_log('[OTHER] '+jd['cmd']+jd))
             except Exception as e:
                 logging.error(self.generate_log(
                     'Error while parsing danmu data:'+str(e)+traceback.format_exc()))
