@@ -117,7 +117,7 @@ def add_path(path: str) -> None:
     path_value = winreg.QueryValueEx(path_key, 'Path')
     if path_value[0].find(abs_path) == -1:
         winreg.SetValueEx(path_key, "Path", 0,
-                          winreg.REG_EXPAND_SZ, path_value[0]+abs_path+";")
+                          winreg.REG_EXPAND_SZ, path_value[0]+(";" if path_value[0][-1]!=";" else "")+abs_path+";")
         refresh_reg()
 
 
