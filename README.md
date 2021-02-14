@@ -9,7 +9,8 @@ FortuneDayssss/BilibiliUploader
 ## 安装指南（Windows）
 1. 在Release下载zip包解压。
 2. 修改配置文件config.json
-3. 运行DDRecorder.exe （使用config.json）或 DDRecorder.exe <配置文件> 
+3. 双击运行DDRecorder.exe （这将使用config.json）或 DDRecorder.exe <配置文件> 
+
 
 ## 安装指南（MacOS/Linux）
 1. 安装Python >= 3.7 https://www.python.org/downloads/release/python-386/
