@@ -46,7 +46,7 @@ class MainRunner():
                                       p.outputs_dir, config)
                 cc.start()
 
-        if config.config.get('root',{}).get('enable_baiduyun',False) and config.get('spec',{}).get('backup',False):
+        if config.get('root',{}).get('enable_baiduyun',False) and config.get('spec',{}).get('backup',False):
             current_state.value = int(utils.state.UPLOADING_TO_BAIDUYUN)
             state_change_time.value = time.time()
             try:
