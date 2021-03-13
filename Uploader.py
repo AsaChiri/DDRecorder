@@ -16,7 +16,7 @@ def upload(uploader: BilibiliUploader, parts: list, cr: int, title: str, tid: in
         while bvid is None:
             avid, bvid = uploader.upload(
                 parts=[parts[0]],
-                cr=cr,
+                copyright=cr,
                 title=title,
                 tid=tid,
                 tag=",".join(tags),
@@ -36,7 +36,7 @@ def upload(uploader: BilibiliUploader, parts: list, cr: int, title: str, tid: in
         while bvid is None:
             avid, bvid = uploader.upload(
                 parts=parts,
-                cr=cr,
+                copyright=cr,
                 title=title,
                 tid=tid,
                 tag=",".join(tags),
