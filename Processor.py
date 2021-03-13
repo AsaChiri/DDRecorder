@@ -2,38 +2,34 @@ import copy
 import datetime
 import shutil
 import os
-import re
 import subprocess
 from typing import Dict, List, Tuple
 import logging
-import jieba
-import jieba.analyse
 import ffmpeg
 import utils
 from BiliLive import BiliLive
+from itertools import groupby
+import jsonlines
 
 
-def __parse_line(txt: str) -> Tuple[datetime.datetime, str]:
-    r = re.match(r'\[(.*?)\](.*)', txt)
-    if r is not None:
-        time = r.group(1)
-        text = r.group(2)
-        return datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S'), text
-    else:
-        return None,""
-
-
-def parse_lines(lines: List[str]) -> Dict[datetime.datetime, List[str]]:
-    return_dict = {}
-    for line in lines:
-        time, text = __parse_line(line)
-        if time is None:
-            continue
-        if return_dict.get(time, None) is None:
-            return_dict[time] = [text]
-        else:
-            return_dict[time].append(text)
-    return return_dict
+def parse_danmu(dir_name):
+    danmu_list = []
+    if os.path.exists(os.path.join(dir_name, 'danmu.jsonl')):
+        with jsonlines.open(os.path.join(dir_name, 'danmu.jsonl')) as reader:
+            for obj in reader:
+                danmu_list.append({
+                    "text": obj['text'],
+                    "time": obj['properties']['time']//1000
+                })
+    if os.path.exists(os.path.join(dir_name, 'superchat.jsonl')):
+        with jsonlines.open(os.path.join(dir_name, 'superchat.jsonl')) as reader:
+            for obj in reader:
+                danmu_list.append({
+                    "text": obj['text'],
+                    "time": obj['time']
+                })
+    danmu_list = sorted(danmu_list, key=lambda x: x['time'])
+    return danmu_list
 
 
 def get_cut_points(time_dict: Dict[datetime.datetime, List[str]], up_ratio: float = 2, down_ratio: float = 0.75, topK: int = 5) -> List[Tuple[datetime.datetime, datetime.datetime, List[str]]]:
@@ -50,8 +46,7 @@ def get_cut_points(time_dict: Dict[datetime.datetime, List[str]], up_ratio: floa
             status = 1
             temp_texts.extend(texts)
         elif status == 1 and len(texts) < prev_num*down_ratio:
-            tags = jieba.analyse.extract_tags(
-                ";".join(temp_texts), topK=topK, withWeight=False)
+            tags = utils.get_words("。".join(texts), topK=topK)
             cut_points.append((start_time, time, tags))
             status = 0
             start_time = time
@@ -75,19 +70,16 @@ def get_true_timestamp(video_times: List[Tuple[datetime.datetime, float]], point
     return time_passed
 
 
-def count(danmus: Dict[datetime.datetime, List[str]], live_start: datetime.datetime, live_duration: float, interval: int = 60) -> Dict[datetime.datetime, List[str]]:
+def count(danmu_list: List, live_start: datetime.datetime, live_duration: float, interval: int = 60) -> Dict[datetime.datetime, List[str]]:
+    start_timestamp = int(live_start.timestamp())
+    timestamp_list = list(
+        range(0, int(live_duration)+interval, interval))
     return_dict = {}
-    clippers = (int(live_duration) // interval)+1
-    for i in range(clippers):
-        return_dict[live_start+datetime.timedelta(seconds=i*interval)] = []
-    for time, text in danmus.items():
-        delta = int((time - live_start).total_seconds())
-        pos_time = (delta // interval) * interval
-        key_time = live_start + datetime.timedelta(seconds=pos_time)
-        if return_dict.get(key_time, None) is None:
-            return_dict[key_time] = text
-        else:
-            return_dict[key_time].extend(text)
+    for k, g in groupby(danmu_list, key=lambda x: (x['time']-start_timestamp)//interval):
+        return_dict[datetime.datetime.fromtimestamp(timestamp_list[k])] = []
+        for o in list(g):
+            return_dict[datetime.datetime.fromtimestamp(
+                timestamp_list[k])].append(o['text'])
     return return_dict
 
 
@@ -117,20 +109,20 @@ class Processor(BiliLive):
         self.global_start = utils.get_global_start_from_records(
             self.record_dir)
         self.merge_conf_path = utils.get_merge_conf_path(
-            self.room_id, self.global_start, config['root']['data_path'])
+            self.room_id, self.global_start, config.get('root', {}).get('data_path', "./"))
         self.merged_file_path = utils.get_mergd_filename(
-            self.room_id, self.global_start, config['root']['data_path'])
+            self.room_id, self.global_start, config.get('root', {}).get('data_path', "./"))
         self.outputs_dir = utils.init_outputs_dir(
-            self.room_id, self.global_start, config['root']['data_path'])
+            self.room_id, self.global_start, config.get('root', {}).get('data_path', "./"))
         self.splits_dir = utils.init_splits_dir(
-            self.room_id, self.global_start, self.config['root']['data_path'])
+            self.room_id, self.global_start, self.config.get('root', {}).get('data_path', "./"))
         self.times = []
         self.live_start = self.global_start
         self.live_duration = 0
         logging.basicConfig(level=utils.get_log_level(config),
                             format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                             datefmt='%a, %d %b %Y %H:%M:%S',
-                            filename=os.path.join(config['root']['logger']['log_path'], "Processor_"+datetime.datetime.now(
+                            filename=os.path.join(config.get('root', {}).get('logger', {}).get('log_path', "./log"), "Processor_"+datetime.datetime.now(
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
                             filemode='a')
 
@@ -144,7 +136,7 @@ class Processor(BiliLive):
                         self.record_dir, filename))[0]+".ts"
                     _ = flv2ts(os.path.join(
                         self.record_dir, filename), ts_path)
-                    if not self.config['spec']['recorder']['keep_raw_record']:
+                    if not self.config.get('spec', {}).get('recorder', {}).get('keep_raw_record', False):
                         os.remove(os.path.join(self.record_dir, filename))
                     # ts_path = os.path.join(self.record_dir, filename)
                     duration = float(ffmpeg.probe(ts_path)[
@@ -167,11 +159,13 @@ class Processor(BiliLive):
         return ret
 
     def cut(self, cut_points: List[Tuple[datetime.datetime, datetime.datetime, List[str]]], min_length: int = 60) -> None:
+        duration = float(ffmpeg.probe(self.merged_file_path)
+                         ['format']['duration'])
         for cut_start, cut_end, tags in cut_points:
             start = get_true_timestamp(self.times,
                                        cut_start) + self.config['spec']['clipper']['start_offset']
-            end = get_true_timestamp(self.times,
-                                     cut_end) + self.config['spec']['clipper']['end_offset'] - self.config['spec']['clipper']['start_offset']
+            end = min(get_true_timestamp(self.times,
+                                         cut_end) + self.config['spec']['clipper']['end_offset'], duration)
             delta = end-start
             outhint = " ".join(tags)
             if delta >= min_length:
@@ -195,8 +189,9 @@ class Processor(BiliLive):
 
     def run(self) -> None:
         self.pre_concat()
-        if not self.config['spec']['recorder']['keep_raw_record']:
-            utils.del_files_and_dir(self.record_dir)
+        if not self.config.get('spec', {}).get('recorder', {}).get('keep_raw_record', False):
+            if os.path.exists(self.merged_file_path):
+                utils.del_files_and_dir(self.record_dir)
         # duration = float(ffmpeg.probe(self.merged_file_path)[
         #                              'format']['duration'])
         # start_time = get_start_time(self.merged_file_path)
@@ -205,15 +200,25 @@ class Processor(BiliLive):
         # self.live_duration = (
         #     self.times[-1][0]-self.times[0][0]).total_seconds()+self.times[-1][1]
 
-        if self.config['spec']['clipper']['enable_clipper']:
-            with open(self.danmu_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-            raw_danmu_dict = parse_lines(lines)
+        if self.config.get('spec', {}).get('clipper', {}).get('enable_clipper', False):
+            danmu_list = parse_danmu(self.danmu_path)
             counted_danmu_dict = count(
-                raw_danmu_dict, self.live_start, self.live_duration, self.config['spec']['parser']['interval'])
-            cut_points = get_cut_points(counted_danmu_dict, self.config['spec']['parser']['up_ratio'],
-                                        self.config['spec']['parser']['down_ratio'], self.config['spec']['parser']['topK'])
-            self.cut(cut_points, self.config['spec']['clipper']['min_length'])
-        if self.config['spec']['uploader']['record']['upload_record']:
-            self.split(self.config['spec']['uploader']
-                       ['record']['split_interval'])
+                danmu_list, self.live_start, self.live_duration, self.config.get('spec', {}).get('parser', {}).get('interval', 60))
+            cut_points = get_cut_points(counted_danmu_dict, self.config.get('spec', {}).get('parser', {}).get('up_ratio', 2.5),
+                                        self.config.get('spec', {}).get('parser', {}).get('down_ratio', 0.75), self.config.get('spec', {}).get('parser', {}).get('topK', 5))
+            self.cut(cut_points, self.config.get('spec', {}).get(
+                'clipper', {}).get('min_length', 60))
+        if self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False):
+            self.split(self.config.get('spec', {}).get('uploader', {})
+                       .get('record', {}).get('split_interval', 3600))
+
+
+if __name__ == "__main__":
+    with open("data/data/danmu/22348429_2021-02-17_10-57-13_danmu.log", "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    raw_danmu_dict = parse_danmu(lines)
+    counted_danmu_dict = count(
+        raw_danmu_dict, datetime.datetime.strptime("2021-02-12_02-04-05", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2021-02-12_05-02-00", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-02-12_02-04-05", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
+    cut_points = get_cut_points(counted_danmu_dict, 2.5,
+                                0.75, 5)
+    print(cut_points)

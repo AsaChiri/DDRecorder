@@ -4,6 +4,8 @@ import json
 import logging
 import os
 import zlib
+import time
+import jsonlines
 from aiowebsocket.converses import AioWebSocket
 import traceback
 import utils
@@ -13,26 +15,8 @@ from BiliLive import BiliLive
 class BiliDanmuRecorder(BiliLive):
     def __init__(self, config: dict, global_start: datetime.datetime):
         BiliLive.__init__(self, config)
-        self.log_filename = utils.init_danmu_log_file(
-            self.room_id, global_start, config['root']['data_path'])
         self.room_server_api = 'wss://broadcastlv.chat.bilibili.com/sub'
-
-    def __log_danmu(self, body: str) -> None:
-        def preProcess(text, l=3):
-            i = 0
-            while i < len(text)-1:
-                j = i+1
-                while j < len(text) and text[j] == text[i]:
-                    j += 1
-                if j-i > l:
-                    text = text[:i] + text[i]*l + text[j:]
-                    i += l
-                else:
-                    i += 1
-            return text
-        with open(self.log_filename, 'a', encoding="utf-8") as fd:
-            fd.write(datetime.datetime.now().strftime('[%Y-%m-%d %H:%M:%S]'))
-            fd.write(preProcess(body)+'\n')
+        self.danmu_dir = utils.init_danmu_log_dir(self.room_id,global_start,config.get('root',{}).get('data_path',"./"))
 
     async def __send_heart_beat(self, websocket):
         hb = '00000010001000010000000200000001'
@@ -60,11 +44,9 @@ class BiliDanmuRecorder(BiliLive):
         logging.basicConfig(level=utils.get_log_level(self.config),
                             format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                             datefmt='%a, %d %b %Y %H:%M:%S',
-                            handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "DanmuRecoder_"+datetime.datetime.now(
+                            handlers=[logging.FileHandler(os.path.join(self.config.get('root',{}).get('logger',{}).get('log_path',"./log"), "DanmuRecoder_"+datetime.datetime.now(
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), "a", encoding="utf-8")])
         try:
-            # 提前创建弹幕记录文件避免因为没有弹幕而失败
-            _ = open(self.log_filename, 'a', encoding="utf-8")
             new_loop = asyncio.new_event_loop()
             asyncio.set_event_loop(new_loop)
             loop = asyncio.get_event_loop()
@@ -100,30 +82,114 @@ class BiliDanmuRecorder(BiliLive):
         if op == 5:
             try:
                 jd = json.loads(data[16:].decode('utf-8', errors='ignore'))
+                logging.debug(self.generate_log(jd['cmd']+'\t'+str(jd)+'\n'))
                 if jd['cmd'] == 'DANMU_MSG':
-                    if jd['info'][1] != "":
-                        self.__log_danmu(jd['info'][1])
-                    logging.debug(self.generate_log(
-                        f"[DANMU] {jd['info'][2][1]}: {jd['info'][1]}\n"))
+                    info=dict(enumerate(jd.get("info",[])))
+                    prop=dict(enumerate(info.get(0,[])))
+                    user_info=dict(enumerate(info.get(2,[])))
+                    medal_info=dict(enumerate(info.get(3,[])))
+                    ul_info=dict(enumerate(info.get(4,[])))
+                    danmu_writer = jsonlines.open(os.path.join(self.danmu_dir,"danmu.jsonl"),mode="a")
+                    danmu_writer.write({
+                        "raw":info,
+                        "properties":{
+                            "type":prop.get(1,1),
+                            "size":prop.get(2,25),
+                            "color":prop.get(3,0xFFFFFF),
+                            "time":prop.get(4,int(round(time.time()*1000)))
+                        },
+                        "text":info.get(1,""),
+                        "user_info":{
+                            "user_id":user_info.get(0,0),
+                            "user_name":user_info.get(1,""),
+                            "user_isAdmin":user_info.get(2,0) == 1,
+                            "user_isVip":user_info.get(3,0) == 1,
+                        },
+                        "medal_info":{
+                            "medal_level":medal_info.get(0,0),
+                            "medal_name":medal_info.get(1,""),
+                            "medal_liver_name":medal_info.get(2,""),
+                            "medal_liver_roomid":medal_info.get(3,0),
+                            "medal_liver_uid":medal_info.get(12,0),
+                            "medal_is_lighted":medal_info.get(11,0) == 1,
+                            "medal_guard_level":medal_info.get(10,0)
+                        },
+                        "ul_info":{
+                            "ul_level":ul_info.get(0,0),
+                        },
+                        "title_info":info.get(5,[]),
+                        "guard_level":info.get(7,0)
+                    })
                 elif jd['cmd'] == 'SEND_GIFT':
-                    logging.debug(self.generate_log(
-                        f"[GIFT] {jd['data']['uname']} {jd['data']['action']} {jd['data']['num']} x {jd['data']['giftName']}\n"))
+                    data = jd.get("data",{})
+                    gift_writer = jsonlines.open(os.path.join(self.danmu_dir,"gift.jsonl"),mode="a")
+                    gift_writer.write({
+                        "raw":data,
+                        "user_id":data.get("uid",0),
+                        "user_name":data.get("uname",""),
+                        "time":data.get("timestamp",int(round(time.time()))),
+                        "gift_name":data.get("giftName",""),
+                        "gift_id":data.get("giftId",0),
+                        "gift_type":data.get("giftType",0),
+                        "price":data.get("price",0),
+                        "num":data.get("num",0),
+                        "total_coin":data.get("total_coin",0),
+                        "coin_type":data.get("coin_type","silver")
+                    })
+                elif jd['cmd'] == 'GUARD_BUY':
+                    data = jd.get("data",{})
+                    guard_writer = jsonlines.open(os.path.join(self.danmu_dir,"guard.jsonl"),mode="a")
+                    guard_writer.write({
+                        "raw":data,
+                        "user_id":data.get("uid",0),
+                        "user_name":data.get("username",""),
+                        "time":data.get("start_time",int(round(time.time()))),
+                        "guard_level":data.get("guard_level",0),
+                        "gift_id":data.get("gift_id",0),
+                        "gift_name":data.get("gift_name",0),
+                        "price":data.get("price",0),
+                        "num":data.get("num",0)
+                    })
                 elif jd['cmd'] == 'LIVE':
                     logging.info(self.generate_log(
                         '[Notice] LIVE Start!\n'))
                 elif jd['cmd'] == 'PREPARING':
                     logging.info(self.generate_log(
                         '[Notice] LIVE Ended!\n'))
+                    with open(os.path.join(self.danmu_dir,"live_end_time"),"w",encoding="utf-8") as f:
+                        f.write(int(round(time.time())))
                 elif jd['cmd'] == 'INTERACT_WORD':
-                    logging.info(self.generate_log(
-                        f"[Notice] UID:{jd['data']['uid']} Username:{jd['data']['uname']} enters the live room\n"))
+                    data = jd.get("data",{})
+                    medal_info = data.get("fans_medal",{})
+                    interact_writer = jsonlines.open(os.path.join(self.danmu_dir,"interaction.jsonl"),mode="a")
+                    interact_writer.write({
+                        "raw":data,
+                        "user_id":data.get("uid",0),
+                        "user_name":data.get("uname",""),
+                        "msg_type":data.get("msg_type",1),
+                        "room_id":data.get("room_id",0),
+                        "time":data.get("timestamp",int(round(time.time()))),
+                        "medal_info":{
+                            "medal_level":medal_info.get("medal_level",0),
+                            "medal_name":medal_info.get("medal_name",""),
+                            "medal_liver_uid":medal_info.get("target_id",0),
+                            "medal_is_lighted":medal_info.get("is_lighted",0) == 1,
+                            "medal_guard_level":medal_info.get("guard_level",0)
+                        },
+                    })
                 elif jd['cmd'] == 'SUPER_CHAT_MESSAGE':
-                    if jd['data']['message'] != "":
-                        self.__log_danmu(jd['data']['message'])
-                    logging.info(self.generate_log(
-                        f"[Notice] UID:{jd['data']['uid']} sends a superchat:{jd['data']['message']}\n"))
-                else:
-                    logging.info(self.generate_log('[OTHER] '+jd['cmd']+jd))
+                    data = jd.get("data",{})
+                    superchat_writer = jsonlines.open(os.path.join(self.danmu_dir,"superchat.jsonl"),mode="a")
+                    superchat_writer.write({
+                        "raw":data,
+                        "text":data.get("message",""),
+                        "user_id":data.get("uid",0),
+                        "user_name":data.get("user_info",{}).get("uname",""),
+                        "time":data.get("timestamp",int(round(time.time()))),
+                        "price":data.get("price",0),
+                        "SCkeep_time":data.get("time",0)
+                    })
             except Exception as e:
                 logging.error(self.generate_log(
                     'Error while parsing danmu data:'+str(e)+traceback.format_exc()))
+                    

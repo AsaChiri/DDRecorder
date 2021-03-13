@@ -38,6 +38,7 @@
                     "username": "account@example.com",
                     "password": "password"
                 },
+                "copyright":2,
                 "record": {
                     "upload_record": true,
                     "keep_record_after_upload": true,
@@ -89,6 +90,7 @@
                 "end_offset": 10
             },
             "uploader": {
+                "copyright":2,
                 "account": {
                     "username": "account@example.com",
                     "password": "password"

@@ -20,7 +20,8 @@ class BaseLive(metaclass=abc.ABCMeta):
             'Connection': 'keep-alive',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36 '
         }
-        self.headers = {**default_headers, **config['root']['request_header']}
+        self.headers = {**default_headers, **
+                        config.get('root', {}).get('request_header', {})}
         self.session = requests.session()
         self.session.mount('https://', HTTPAdapter(max_retries=3))
         self.room_id = ''
@@ -28,10 +29,10 @@ class BaseLive(metaclass=abc.ABCMeta):
         self.site_domain = ''
         self.config = config
         self.__last_check_time = datetime.datetime.now(
-        )+datetime.timedelta(seconds=-config['root']['check_interval'])
+        )+datetime.timedelta(seconds=-config.get('root', {}).get('check_interval', 60))
         self.__live_status = False
         self.__allowed_check_interval = datetime.timedelta(
-            seconds=config['root']['check_interval'])
+            seconds=config.get('root', {}).get('check_interval', 60))
 
     def common_request(self, method: str, url: str, params: dict = None, data: dict = None) -> requests.Response:
         try:
@@ -44,7 +45,8 @@ class BaseLive(metaclass=abc.ABCMeta):
                     url, headers=self.headers, params=params, data=data, verify=False, timeout=5)
             return connection
         except requests.exceptions.RequestException as e:
-            logging.error(self.generate_log("Request Error"+str(e)+traceback.format_exc()))
+            logging.error(self.generate_log(
+                "Request Error"+str(e)+traceback.format_exc()))
 
     @abc.abstractmethod
     def get_room_info(self):
@@ -72,7 +74,8 @@ class BaseLive(metaclass=abc.ABCMeta):
                 self.__live_status = self.__check_live_status()
                 self.__last_check_time = datetime.datetime.now()
             except Exception as e:
-                logging.error(self.generate_log("Status Error"+str(e)+traceback.format_exc()))
+                logging.error(self.generate_log(
+                    "Status Error"+str(e)+traceback.format_exc()))
         else:
             logging.debug(self.generate_log("间隔不足，使用过去状态"))
         return self.__live_status
