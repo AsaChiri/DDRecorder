@@ -11,7 +11,7 @@
         "uploader": {
             "upload_by_edit": true,
             "thread_pool_workers": 1,
-            "max_retry": 50
+            "max_retry": 30
         },
         "enable_baiduyun": true
     },
@@ -38,7 +38,7 @@
                     "username": "account@example.com",
                     "password": "password"
                 },
-                "copyright":2,
+                "copyright": 2,
                 "record": {
                     "upload_record": true,
                     "keep_record_after_upload": true,
@@ -90,11 +90,11 @@
                 "end_offset": 10
             },
             "uploader": {
-                "copyright":2,
                 "account": {
                     "username": "account@example.com",
                     "password": "password"
                 },
+                "copyright": 2,
                 "record": {
                     "upload_record": false,
                     "keep_record_after_upload": true,

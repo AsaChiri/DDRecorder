@@ -10,12 +10,12 @@ from lastversion import lastversion
 import utils
 from MainRunner import MainThreadRunner
 
-CURRENT_VERSION = "1.1.3"
+CURRENT_VERSION = "1.1.4"
 
 if __name__ == "__main__":
     freeze_support()
 
-    latest_version = lastversion.has_update(repo="AsaChiri/DDRecorder", current_version=CURRENT_VERSION)
+    latest_version = lastversion.has_update(repo="https://hub.fastgit.org/AsaChiri/DDRecorder", current_version=CURRENT_VERSION)
     if latest_version:
         print('DDRecorder有更新，版本号: {} 请尽快到https://github.com/AsaChiri/DDRecorder/releases 下载最新版'.format(str(latest_version)))
     else:
