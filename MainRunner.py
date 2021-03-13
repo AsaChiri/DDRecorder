@@ -1,4 +1,3 @@
-import _thread
 import datetime
 import logging
 import threading
@@ -22,7 +21,7 @@ class MainRunner():
         self.current_state = Value(
             'i', int(utils.state.WAITING_FOR_LIVE_START))
         self.state_change_time = Value('f', time.time())
-        if self.config['root']['enable_baiduyun']:
+        if self.config.get('root',{}).get('enable_baiduyun',False):
             from bypy import ByPy
             _ = ByPy()
         self.bl = BiliLive(self.config)
@@ -33,21 +32,21 @@ class MainRunner():
         p = Processor(config, record_dir, danmu_path)
         p.run()
 
-        if config['spec']['uploader']['record']['upload_record'] or config['spec']['uploader']['clips']['upload_clips']:
+        if config.get('spec',{}).get('uploader',{}).get('record',{}).get('upload_record',False) or config.get('spec',{}).get('uploader',{}).get('clips',{}).get('upload_clips',False):
             current_state.value = int(utils.state.UPLOADING_TO_BILIBILI)
             state_change_time.value = time.time()
             u = Uploader(p.outputs_dir, p.splits_dir, config)
             d = u.upload(p.global_start)
-            if not config['spec']['uploader']['record']['keep_record_after_upload'] and d.get("record", None) is not None:
+            if not config.get('spec',{}).get('uploader',{}).get('record',{}).get('keep_record_after_upload',True) and d.get("record", None) is not None:
                 rc = BiliVideoChecker(d['record']['bvid'],
                                       p.splits_dir, config)
                 rc.start()
-            if not config['spec']['uploader']['clips']['keep_clips_after_upload'] and d.get("clips", None) is not None:
+            if not config.get('spec',{}).get('uploader',{}).get('clips',{}).get('keep_clips_after_upload',True) and d.get("clips", None) is not None:
                 cc = BiliVideoChecker(d['clips']['bvid'],
                                       p.outputs_dir, config)
                 cc.start()
 
-        if config['root']['enable_baiduyun'] and config['spec']['backup']:
+        if config.get('root',{}).get('enable_baiduyun',False) and config.get('spec',{}).get('backup',False):
             current_state.value = int(utils.state.UPLOADING_TO_BAIDUYUN)
             state_change_time.value = time.time()
             try:
@@ -90,10 +89,10 @@ class MainRunner():
 
                     self.prev_live_status = False
                     proc_process = Process(target=self.proc, args=(
-                        self.config, self.blr.record_dir, self.bdr.log_filename, self.current_state, self.state_change_time))
+                        self.config, self.blr.record_dir, self.bdr.danmu_dir, self.current_state, self.state_change_time))
                     proc_process.start()
                 else:
-                    time.sleep(self.config['root']['check_interval'])
+                    time.sleep(self.config.get('root',{}).get('check_interval',60))
         except KeyboardInterrupt:
             return
         except Exception as e:

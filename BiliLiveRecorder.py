@@ -15,9 +15,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class BiliLiveRecorder(BiliLive):
     def __init__(self, config: dict, global_start: datetime.datetime):
-        BiliLive.__init__(self,config)
+        BiliLive.__init__(self, config)
         self.record_dir = utils.init_record_dir(
-            self.room_id, global_start, config['root']['data_path'])
+            self.room_id, global_start, config.get('root', {}).get('data_path', "./"))
 
     def record(self, record_url: str, output_filename: str) -> None:
         try:
@@ -30,7 +30,7 @@ class BiliLiveRecorder(BiliLive):
                     record_url)[0]
             }
             headers = {**default_headers, **
-                       self.config['root']['request_header']}
+                       self.config.get('root', {}).get('request_header', {})}
             resp = requests.get(record_url, stream=True,
                                 headers=headers,
                                 timeout=20)
@@ -46,7 +46,7 @@ class BiliLiveRecorder(BiliLive):
         logging.basicConfig(level=utils.get_log_level(self.config),
                             format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                             datefmt='%a, %d %b %Y %H:%M:%S',
-                            handlers=[logging.FileHandler(os.path.join(self.config['root']['logger']['log_path'], "LiveRecoder_"+datetime.datetime.now(
+                            handlers=[logging.FileHandler(os.path.join(self.config.get('root', {}).get('logger', {}).get('log_path', "./log"), "LiveRecoder_"+datetime.datetime.now(
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), "a", encoding="utf-8")])
         while True:
             try:

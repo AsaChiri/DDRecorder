@@ -10,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class BiliLive(BaseLive):
     def __init__(self, config: dict):
         super().__init__(config)
-        self.room_id = config['spec']['room_id']
+        self.room_id = config.get('spec', {}).get('room_id', '')
         self.site_name = 'BiliBili'
         self.site_domain = 'live.bilibili.com'
 

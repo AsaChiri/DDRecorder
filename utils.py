@@ -1,3 +1,5 @@
+from collections import Counter
+import jieba
 import os
 import datetime
 import logging
@@ -51,10 +53,11 @@ def init_record_dir(room_id: str, global_start: datetime.datetime, root_dir: str
     return dirs
 
 
-def init_danmu_log_file(room_id: str, global_start: datetime.datetime, root_dir: str = os.getcwd()) -> str:
-    log_filename = os.path.join(
-        root_dir, 'data', 'danmu', f"{room_id}_{global_start.strftime('%Y-%m-%d_%H-%M-%S')}_danmu.log")
-    return log_filename
+def init_danmu_log_dir(room_id: str, global_start: datetime.datetime, root_dir: str = os.getcwd()) -> str:
+    log_dir = os.path.join(
+        root_dir, 'data', 'danmu', f"{room_id}_{global_start.strftime('%Y-%m-%d_%H-%M-%S')}")
+    check_and_create_dir(log_dir)
+    return log_dir
 
 
 def generate_filename(room_id: str) -> str:
@@ -117,7 +120,7 @@ def add_path(path: str) -> None:
     path_value = winreg.QueryValueEx(path_key, 'Path')
     if path_value[0].find(abs_path) == -1:
         winreg.SetValueEx(path_key, "Path", 0,
-                          winreg.REG_EXPAND_SZ, path_value[0]+(";" if path_value[0][-1]!=";" else "")+abs_path+";")
+                          winreg.REG_EXPAND_SZ, path_value[0]+(";" if path_value[0][-1] != ";" else "")+abs_path+";")
         refresh_reg()
 
 
@@ -157,3 +160,15 @@ def print_log(runner_list: list) -> str:
         f"    DDRecorder  当前时间：{datetime.datetime.now()} 正在工作线程数：{threading.activeCount()}\n")
     print(tb)
     print("\n")
+
+
+def get_words(txt, topK=5):
+    seg_list = jieba.cut(txt)  # 对文本进行分词
+    c = Counter()
+    for x in seg_list:  # 进行词频统计
+        if len(x) > 1 and x != '\r\n':
+            c[x] += 1
+    try:
+        return list(list(zip(*c.most_common(topK)))[0])
+    except IndexError:
+        return []
