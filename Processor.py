@@ -76,10 +76,10 @@ def count(danmu_list: List, live_start: datetime.datetime, live_duration: float,
         range(0, int(live_duration)+interval, interval))
     return_dict = {}
     for k, g in groupby(danmu_list, key=lambda x: (x['time']-start_timestamp)//interval):
-        return_dict[datetime.datetime.fromtimestamp(timestamp_list[k])] = []
+        return_dict[datetime.datetime.fromtimestamp(timestamp_list[k]+start_timestamp)] = []
         for o in list(g):
             return_dict[datetime.datetime.fromtimestamp(
-                timestamp_list[k])].append(o['text'])
+                timestamp_list[k]+start_timestamp)].append(o['text'])
     return return_dict
 
 
@@ -214,11 +214,9 @@ class Processor(BiliLive):
 
 
 if __name__ == "__main__":
-    with open("data/data/danmu/22348429_2021-02-17_10-57-13_danmu.log", "r", encoding="utf-8") as f:
-        lines = f.readlines()
-    raw_danmu_dict = parse_danmu(lines)
+    danmu_list = parse_danmu("data/data/danmu/22603245_2021-03-13_11-20-16")
     counted_danmu_dict = count(
-        raw_danmu_dict, datetime.datetime.strptime("2021-02-12_02-04-05", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2021-02-12_05-02-00", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-02-12_02-04-05", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
+        danmu_list, datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2021-03-13_13-45-16", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
     cut_points = get_cut_points(counted_danmu_dict, 2.5,
                                 0.75, 5)
     print(cut_points)
