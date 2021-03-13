@@ -10,7 +10,7 @@ from lastversion import lastversion
 import utils
 from MainRunner import MainThreadRunner
 
-CURRENT_VERSION = "1.1.2"
+CURRENT_VERSION = "1.1.3"
 
 if __name__ == "__main__":
     freeze_support()
