@@ -1,7 +1,7 @@
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
 
-**新版本测试分支**
+**>=1.1.2版本增加了自动检查更新功能，需要连接至Github服务器，敬请留意。**
  
 ## 感谢
 FortuneDayssss/BilibiliUploader
@@ -53,6 +53,7 @@ FortuneDayssss/BilibiliUploader
   - account: 上传账户信息
     - username: 用户名
     - password: 密码
+  - copyright: 稿件类型（1：自制，2：转载）**警告！未经授权投稿“自制”可能导致稿件无法通过审核！**
   - record: 录播上传设置
     - upload_record: 是否上传录播。默认：true
     - keep_record_after_upload: 是否在上传过审后保留录播。默认：true
