@@ -64,7 +64,6 @@ class MainRunner():
     def run(self):
         try:
             while True:
-
                 if not self.prev_live_status and self.bl.live_status:                 
                     start = datetime.datetime.now()
                     self.blr = BiliLiveRecorder(self.config, start)

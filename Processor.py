@@ -72,26 +72,25 @@ def get_true_timestamp(video_times: List[Tuple[datetime.datetime, float]], point
 
 def count(danmu_list: List, live_start: datetime.datetime, live_duration: float, interval: int = 60) -> Dict[datetime.datetime, List[str]]:
     start_timestamp = int(live_start.timestamp())
-    timestamp_list = list(
-        range(0, int(live_duration)+interval, interval))
     return_dict = {}
     for k, g in groupby(danmu_list, key=lambda x: (x['time']-start_timestamp)//interval):
-        return_dict[datetime.datetime.fromtimestamp(timestamp_list[k]+start_timestamp)] = []
+        return_dict[datetime.datetime.fromtimestamp(
+            k*interval+start_timestamp)] = []
         for o in list(g):
             return_dict[datetime.datetime.fromtimestamp(
-                timestamp_list[k]+start_timestamp)].append(o['text'])
+                k*interval+start_timestamp)].append(o['text'])
     return return_dict
 
 
-def flv2ts(input_file: str, output_file: str) -> subprocess.CompletedProcess:
+def flv2ts(input_file: str, output_file: str, ffmpeg_logfile_hander) -> subprocess.CompletedProcess:
     ret = subprocess.run(
-        f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -f mpegts {output_file}", shell=True, check=True)
+        f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -f mpegts {output_file}", shell=True, check=True, stdout=ffmpeg_logfile_hander)
     return ret
 
 
-def concat(merge_conf_path: str, merged_file_path: str) -> subprocess.CompletedProcess:
+def concat(merge_conf_path: str, merged_file_path: str, ffmpeg_logfile_hander) -> subprocess.CompletedProcess:
     ret = subprocess.run(
-        f"ffmpeg -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True)
+        f"ffmpeg -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True, stdout=ffmpeg_logfile_hander)
     return ret
 
 
@@ -125,6 +124,8 @@ class Processor(BiliLive):
                             filename=os.path.join(config.get('root', {}).get('logger', {}).get('log_path', "./log"), "Processor_"+datetime.datetime.now(
                             ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
                             filemode='a')
+        self.ffmpeg_logfile_hander = open(os.path.join(config.get('root', {}).get('logger', {}).get('log_path', "./log"), "FFMpeg_"+datetime.datetime.now(
+        ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), mode="a", encoding="utf-8")
 
     def pre_concat(self) -> None:
         filelist = os.listdir(self.record_dir)
@@ -135,7 +136,7 @@ class Processor(BiliLive):
                     ts_path = os.path.splitext(os.path.join(
                         self.record_dir, filename))[0]+".ts"
                     _ = flv2ts(os.path.join(
-                        self.record_dir, filename), ts_path)
+                        self.record_dir, filename), ts_path, self.ffmpeg_logfile_hander)
                     if not self.config.get('spec', {}).get('recorder', {}).get('keep_raw_record', False):
                         os.remove(os.path.join(self.record_dir, filename))
                     # ts_path = os.path.join(self.record_dir, filename)
@@ -145,7 +146,8 @@ class Processor(BiliLive):
                     self.times.append((start_time, duration))
                     f.write(
                         f"file '{ts_path}'\n")
-        _ = concat(self.merge_conf_path, self.merged_file_path)
+        _ = concat(self.merge_conf_path, self.merged_file_path,
+                   self.ffmpeg_logfile_hander)
         self.times.sort(key=lambda x: x[0])
         self.live_start = self.times[0][0]
         self.live_duration = (
@@ -155,7 +157,8 @@ class Processor(BiliLive):
         output_file = os.path.join(
             self.outputs_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{start_time:012}_{outhint}.mp4")
         cmd = f'ffmpeg -y -ss {start_time} -t {delta} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
-        ret = subprocess.run(cmd, shell=True, check=True)
+        ret = subprocess.run(cmd, shell=True, check=True,
+                             stdout=self.ffmpeg_logfile_hander)
         return ret
 
     def cut(self, cut_points: List[Tuple[datetime.datetime, datetime.datetime, List[str]]], min_length: int = 60) -> None:
@@ -185,7 +188,8 @@ class Processor(BiliLive):
             output_file = os.path.join(
                 self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{i}.mp4")
             cmd = f'ffmpeg -y -ss {i*split_interval} -t {split_interval} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
-            _ = subprocess.run(cmd, shell=True, check=True)
+            _ = subprocess.run(cmd, shell=True, check=True,
+                               stdout=self.ffmpeg_logfile_hander)
 
     def run(self) -> None:
         self.pre_concat()

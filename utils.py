@@ -153,7 +153,7 @@ class state(Enum):
 def print_log(runner_list: list) -> str:
     tb = pt.PrettyTable()
     tb.field_names = ["TID", "平台", "房间号", "直播状态", "程序状态", "状态变化时间"]
-    for runner in runner_list:
+    for runner in runner_list.values():
         tb.add_row([runner.native_id, runner.mr.bl.site_name, runner.mr.bl.room_id, "是" if runner.mr.bl.live_status else "否",
                     str(state(runner.mr.current_state.value)), datetime.datetime.fromtimestamp(runner.mr.state_change_time.value)])
     print(

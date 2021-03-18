@@ -122,6 +122,7 @@ class BiliDanmuRecorder(BiliLive):
                     })
                 elif jd['cmd'] == 'SEND_GIFT':
                     data = jd.get("data",{})
+                    medal_info = data.get("medal_info",{})
                     gift_writer = jsonlines.open(os.path.join(self.danmu_dir,"gift.jsonl"),mode="a")
                     gift_writer.write({
                         "raw":data,
@@ -134,7 +135,14 @@ class BiliDanmuRecorder(BiliLive):
                         "price":data.get("price",0),
                         "num":data.get("num",0),
                         "total_coin":data.get("total_coin",0),
-                        "coin_type":data.get("coin_type","silver")
+                        "coin_type":data.get("coin_type","silver"),
+                        "medal_info":{
+                            "medal_level":medal_info.get("medal_level",0),
+                            "medal_name":medal_info.get("medal_name",""),
+                            "medal_liver_uid":medal_info.get("target_id",0),
+                            "medal_is_lighted":medal_info.get("is_lighted",0) == 1,
+                            "medal_guard_level":medal_info.get("guard_level",0)
+                        },
                     })
                 elif jd['cmd'] == 'GUARD_BUY':
                     data = jd.get("data",{})
@@ -157,7 +165,7 @@ class BiliDanmuRecorder(BiliLive):
                     logging.info(self.generate_log(
                         '[Notice] LIVE Ended!\n'))
                     with open(os.path.join(self.danmu_dir,"live_end_time"),"w",encoding="utf-8") as f:
-                        f.write(int(round(time.time())))
+                        f.write(str(int(round(time.time()))))
                 elif jd['cmd'] == 'INTERACT_WORD':
                     data = jd.get("data",{})
                     medal_info = data.get("fans_medal",{})
@@ -179,6 +187,7 @@ class BiliDanmuRecorder(BiliLive):
                     })
                 elif jd['cmd'] == 'SUPER_CHAT_MESSAGE':
                     data = jd.get("data",{})
+                    medal_info = data.get("medal_info",{})
                     superchat_writer = jsonlines.open(os.path.join(self.danmu_dir,"superchat.jsonl"),mode="a")
                     superchat_writer.write({
                         "raw":data,
@@ -187,7 +196,15 @@ class BiliDanmuRecorder(BiliLive):
                         "user_name":data.get("user_info",{}).get("uname",""),
                         "time":data.get("timestamp",int(round(time.time()))),
                         "price":data.get("price",0),
-                        "SCkeep_time":data.get("time",0)
+                        "SCkeep_time":data.get("time",0),
+                        "medal_info":{
+                            "medal_level":medal_info.get("medal_level",0),
+                            "medal_name":medal_info.get("medal_name",""),
+                            "medal_liver_name":medal_info.get("anchor_uname",""),
+                            "medal_liver_uid":medal_info.get("target_id",0),
+                            "medal_is_lighted":medal_info.get("is_lighted",0) == 1,
+                            "medal_guard_level":medal_info.get("guard_level",0)
+                        },
                     })
             except Exception as e:
                 logging.error(self.generate_log(
