@@ -145,7 +145,7 @@ class Processor(BiliLive):
                     start_time = get_start_time(filename)
                     self.times.append((start_time, duration))
                     f.write(
-                        f"file '{ts_path}'\n")
+                        f"file '{os.path.abspath(ts_path)}'\n")
         _ = concat(self.merge_conf_path, self.merged_file_path,
                    self.ffmpeg_logfile_hander)
         self.times.sort(key=lambda x: x[0])
