@@ -58,18 +58,29 @@ FortuneDayssss/BilibiliUploader
     - upload_record: 是否上传录播。默认：true
     - keep_record_after_upload: 是否在上传过审后保留录播。默认：true
     - split_interval: 录播划分间隔，单位秒。由于B站无法一次上传大文件，因此长录播需要分片才能上传。默认：3600。如设为0，表示不划分，如此请保证账号具有超大文件权限。
-    - title：上传视频的标题，可以用 {date} 标识日期
+    - title：上传视频的标题，可以用 {date}, {year}, {month}, {day}, {rough_time}, {room_name}, {area_name}, {parent_area_name} 占位符
     - tid：分区编号，可在 https://github.com/FortuneDayssss/BilibiliUploader/wiki/Bilibili%E5%88%86%E5%8C%BA%E5%88%97%E8%A1%A8 查询
-    - tags：上传视频的标签
-    - desc：上传视频的描述，可以用 {date} 标识日期
+    - tags：上传视频的标签，可以用 {area_name}, {parent_area_name} 占位符
+    - desc：上传视频的描述，可以用 {date}, {year}, {month}, {day}, {rough_time}, {room_name}, {area_name}, {parent_area_name} 占位符
   - clippers: 自动切片上传设置
     - upload_clippers: 是否上传自动切片。默认：true
     - keep_clippers_after_upload: 是否在上传过审后保留自动切片。默认：true
-    - title：上传视频的标题，可以用 {date} 标识日期
+    - title：上传视频的标题，可以用 {date}, {year}, {month}, {day}, {rough_time}, {room_name}, {area_name}, {parent_area_name} 占位符
     - tid：分区编号，可在 https://github.com/FortuneDayssss/BilibiliUploader/wiki/Bilibili%E5%88%86%E5%8C%BA%E5%88%97%E8%A1%A8 查询
-    - tags：上传视频的标签
-    - desc：上传视频的描述，可以用 {date} 标识日期
+    - tags：上传视频的标签，可以用 {area_name}, {parent_area_name} 占位符
+    - desc：上传视频的描述，可以用 {date}, {year}, {month}, {day}, {rough_time}, {room_name}, {area_name}, {parent_area_name} 占位符
 - backup：是否将录像备份到百度云。
+
+### 占位符
+指会被程序替换为指定数据的字符串
+- `{date}` 日期 例 2021年5月1日
+- `{year}` 年 例 2021
+- `{month}` 月 例 5
+- `{day}` 日 例 1
+- `{rough_time}` 时间在当天所在区间，可能的值为：凌晨、上午、下午、晚上
+- `{room_name}` 上传视频时直播间名
+- `{area_name}` 二级分区名
+- `{parent_area_name}` 一级分区名
 
 ## 已知问题
 - merged文件下下文件不会在备份到百度云后自动删除。（该问题是由于从百度云获得的MD5始终对不上导致的，因涉及第三方库，正在调查。）

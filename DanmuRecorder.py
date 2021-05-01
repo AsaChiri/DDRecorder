@@ -23,7 +23,7 @@ class BiliDanmuRecorder(BiliLive):
         while self.live_status:
             await asyncio.sleep(30)
             await websocket.send(bytes.fromhex(hb))
-            logging.debug(self.generate_log("弹幕接收器已发送心跳包"))
+            logging.debug(self.generate_log("弹幕记录器已发送心跳包"))
 
     async def __receDM(self, websocket):
         while self.live_status:
