@@ -80,6 +80,8 @@ class Uploader(BiliLive):
             3: '晚上'
         }[int(global_start.hour / 6)]
         room_name = self.get_room_info()['roomname']
+        area_name = self.get_room_info()['area_name']
+        parent_area_name = self.get_room_info()['parent_area_name']
         try:
             if self.config.get('spec', {}).get('uploader', {}).get('clips', {}).get('upload_clips', False):
                 output_parts = []
@@ -91,8 +93,9 @@ class Uploader(BiliLive):
                     output_parts.append(VideoPart(
                         path=os.path.join(self.output_dir, filename),
                         title=title,
-                        desc=self.config.get('spec', {}).get('uploader', {}).get('clips', {}).get('desc', "").format(
-                            date=datestr, year=year, month=month, day=day, rough_time=rough_time, room_name=room_name),
+                        desc=self.config.get('spec', {}).get('uploader', {}).get('clips', {}).get('desc', "")
+                            .format(date=datestr, year=year, month=month, day=day, rough_time=rough_time,
+                                    room_name=room_name, area_name=area_name, parent_area_name=parent_area_name),
                     ))
 
                 avid, bvid = upload(self.uploader, output_parts,
@@ -101,15 +104,16 @@ class Uploader(BiliLive):
                                     title=self.config.get('spec', {}).get('uploader', {}).get('clips', {})
                                     .get('title', "")
                                     .format(date=datestr, year=year, month=month, day=day, rough_time=rough_time,
-                                            room_name=room_name),
+                                            room_name=room_name, area_name=area_name, parent_area_name=parent_area_name),
                                     tid=self.config.get('spec', {}).get(
                                         'uploader', {}).get('clips', {}).get('tid', 27),
                                     tags=self.config.get('spec', {}).get(
-                                        'uploader', {}).get('clips', {}).get('tags', []),
+                                        'uploader', {}).get('clips', {}).get('tags', [])
+                                    .format(area_name=area_name, parent_area_name=parent_area_name),
                                     desc=self.config.get('spec', {}).get('uploader', {}).get('clips', {})
                                     .get('desc', "")
                                     .format(date=datestr, year=year, month=month, day=day, rough_time=rough_time,
-                                            room_name=room_name),
+                                            room_name=room_name, area_name=area_name, parent_area_name=parent_area_name),
                                     source="https://live.bilibili.com/" + self.room_id,
                                     thread_pool_workers=self.config
                                     .get('root', {}).get('uploader', {}).get('thread_pool_workers', 1),
@@ -140,15 +144,16 @@ class Uploader(BiliLive):
                                     title=self.config.get('spec', {}).get('uploader', {}).get('record', {})
                                     .get('title', "")
                                     .format(date=datestr, year=year, month=month, day=day, rough_time=rough_time,
-                                            room_name=room_name),
+                                            room_name=room_name, area_name=area_name, parent_area_name=parent_area_name),
                                     tid=self.config.get('spec', {}).get(
                                         'uploader', {}).get('record', {}).get('tid', 27),
                                     tags=self.config.get('spec', {}).get(
-                                        'uploader', {}).get('record', {}).get('tags', []),
+                                        'uploader', {}).get('record', {}).get('tags', [])
+                                    .format(area_name=area_name, parent_area_name=parent_area_name),
                                     desc=self.config.get('spec', {}).get('uploader', {}).get('record', {})
                                     .get('desc', "")
                                     .format(date=datestr, year=year, month=month, day=day, rough_time=rough_time,
-                                            room_name=room_name),
+                                            room_name=room_name, area_name=area_name, parent_area_name=parent_area_name),
                                     source="https://live.bilibili.com/" + self.room_id,
                                     thread_pool_workers=self.config.get('root', {}).get(
                                         'uploader', {}).get('thread_pool_workers', 1),
