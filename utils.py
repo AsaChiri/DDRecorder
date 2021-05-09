@@ -49,7 +49,7 @@ def init_data_dirs(root_dir: str = os.getcwd()) -> None:
 def generate_general_path_base(room_id: str, timestamp: datetime.datetime, room_name: str = "") -> str:
     # TODO: 该替换操作不可逆。可以考虑生成一个metadata文件用于保留（包括直播间名称在内的）各种元信息
     filename_safe_room_name = room_name.translate(
-        "".maketrans("_\/|:&?<>\"", "-------()'"))
+        "".maketrans("_\/|:&?<>\"", "---------'"))
     timestamp_str = timestamp.strftime('%Y-%m-%d_%H-%M-%S')
     return "_".join(filter(None, [room_id, timestamp_str, filename_safe_room_name]))
 
