@@ -128,3 +128,6 @@ data/
 log/
 config/*
 !config/config.json
+
+# vscode
+.vscode
