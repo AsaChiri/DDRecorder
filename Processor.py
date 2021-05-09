@@ -107,7 +107,8 @@ class Processor(BiliLive):
         self.danmu_path = danmu_path
         self.global_start = utils.get_global_start_from_records(
             self.record_dir)
-        self.room_name = utils.get_room_name_from_records(self.record_dir)
+        self.room_name = utils.get_room_name_from_records(self.record_dir) if config.get(
+            'root', {}).get('room_name_in_naming', False) else ""
         self.merge_conf_path = utils.get_merge_conf_path(
             self.room_id, self.global_start, self.room_name, config.get('root', {}).get('data_path', "./"))
         self.merged_file_path = utils.get_mergd_filename(
