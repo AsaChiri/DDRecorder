@@ -79,7 +79,7 @@ def get_global_start_from_records(record_dir: str) -> datetime.datetime:
 
 def get_room_name_from_records(record_dir: str) -> str:
     base = os.path.basename(record_dir)
-    return base.split("_")[4]
+    return base.split("_")[3]
 
 
 def get_mergd_filename(room_id: str, global_start: datetime.datetime, room_name: str = "", root_dir: str = os.getcwd()) -> str:
