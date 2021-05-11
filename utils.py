@@ -82,7 +82,7 @@ def get_room_name_from_records(record_dir: str) -> str:
     return base.split("_")[3]
 
 
-def get_mergd_filename(room_id: str, global_start: datetime.datetime, room_name: str = "", root_dir: str = os.getcwd()) -> str:
+def get_merged_filename(room_id: str, global_start: datetime.datetime, room_name: str = "", root_dir: str = os.getcwd()) -> str:
     filename = os.path.join(root_dir, 'data', 'merged',
                             f"{generate_general_path_base(room_id, global_start, room_name)}_merged.mp4")
     return filename

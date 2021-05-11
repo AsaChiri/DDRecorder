@@ -24,9 +24,11 @@ class BiliLive(BaseLive):
         response = self.common_request('GET', room_info_url, {
             'room_id': self.room_id
         }).json()
-        logging.debug(self.generate_log("房间API消息："+response['msg']))
+        logging.debug(self.generate_log("房间信息请求结果：" + response['msg']))
         if response['msg'] == 'ok':
             data['room_name'] = response['data']['title']
+            data['area_name'] = response['data']['area_name']
+            data['parent_area_name'] = response['data']['parent_area_name']
             data['site_name'] = self.site_name
             data['site_domain'] = self.site_domain
             data['status'] = response['data']['live_status'] == 1
@@ -55,6 +57,6 @@ class BiliLive(BaseLive):
                 'platform': 'web'
             }).json()
         for durl in stream_info['data']['durl']:
-            logging.debug(self.generate_log("获取到以下地址："+durl['url']))
+            logging.debug(self.generate_log("直播视频流链接：" + durl['url']))
             live_urls.append(durl['url'])
         return live_urls
