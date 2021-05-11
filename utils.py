@@ -69,7 +69,7 @@ def get_global_start_from_records(record_dir: str) -> datetime.datetime:
     return datetime.datetime.strptime(" ".join(base.split("_")[1:3]), '%Y-%m-%d %H-%M-%S')
 
 
-def get_mergd_filename(room_id: str, global_start: datetime.datetime, root_dir: str = os.getcwd()) -> str:
+def get_merged_filename(room_id: str, global_start: datetime.datetime, root_dir: str = os.getcwd()) -> str:
     filename = os.path.join(root_dir, 'data', 'merged',
                             f"{room_id}_{global_start.strftime('%Y-%m-%d_%H-%M-%S')}_merged.mp4")
     return filename
