@@ -69,7 +69,7 @@ class BaseLive(metaclass=abc.ABCMeta):
     @property
     def live_status(self) -> bool:
         if datetime.datetime.now()-self.__last_check_time >= self.__allowed_check_interval:
-            logging.debug(self.generate_log("允许检查"))
+            logging.debug(self.generate_log("开始抓取直播数据"))
             try:
                 self.__live_status = self.__check_live_status()
                 self.__last_check_time = datetime.datetime.now()
@@ -77,7 +77,7 @@ class BaseLive(metaclass=abc.ABCMeta):
                 logging.error(self.generate_log(
                     "Status Error"+str(e)+traceback.format_exc()))
         else:
-            logging.debug(self.generate_log("间隔不足，使用过去状态"))
+            logging.debug(self.generate_log("未到下次抓取时间，使用已缓存直播状态"))
         return self.__live_status
 
     @live_status.setter
