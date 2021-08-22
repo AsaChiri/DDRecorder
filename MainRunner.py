@@ -37,11 +37,11 @@ class MainRunner():
             state_change_time.value = time.time()
             u = Uploader(p.outputs_dir, p.splits_dir, config)
             d = u.upload(p.global_start)
-            if not config.get('spec',{}).get('uploader',{}).get('record',{}).get('keep_record_after_upload',True) and d.get("record", None) is not None:
+            if not config.get('spec',{}).get('uploader',{}).get('record',{}).get('keep_record_after_upload',True) and d.get("record", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
                 rc = BiliVideoChecker(d['record']['bvid'],
                                       p.splits_dir, config)
                 rc.start()
-            if not config.get('spec',{}).get('uploader',{}).get('clips',{}).get('keep_clips_after_upload',True) and d.get("clips", None) is not None:
+            if not config.get('spec',{}).get('uploader',{}).get('clips',{}).get('keep_clips_after_upload',True) and d.get("clips", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
                 cc = BiliVideoChecker(d['clips']['bvid'],
                                       p.outputs_dir, config)
                 cc.start()

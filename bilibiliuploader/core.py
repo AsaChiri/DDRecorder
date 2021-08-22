@@ -45,7 +45,7 @@ class VideoPart:
                     server_file_name=self.server_file_name)
 
 
-def get_key(sid=None, jsessionid=None):
+def get_key_old(sid=None, jsessionid=None):
     """
     get public key, hash and session id for login.
     Args:
@@ -72,15 +72,37 @@ def get_key(sid=None, jsessionid=None):
     if jsessionid:
         cookie['JSESSIONID'] = jsessionid
     r = requests.post(
-        "https://passport.bilibili.com/api/oauth2/getKey",
+        # "https://passport.bilibili.com/api/oauth2/getKey",
+        "https://passport.bilibili.com/x/passport-login/web/key",
         headers=headers,
         data=post_data,
         cookies=cookie
     )
+    print(r.content.decode())
     r_data = r.json()['data']
     if sid:
         return r_data['hash'], r_data['key'], sid
     return r_data['hash'], r_data['key'], r.cookies['sid']
+
+
+def get_key():
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': "application/json, text/javascript, */*; q=0.01"
+    }
+    params_data = {
+        'appkey': APPKEY,
+        'platform': "pc",
+        'ts': str(int(datetime.now().timestamp()))
+    }
+    params_data['sign'] = cipher.sign_dict(params_data, APPSECRET)
+    r = requests.get(
+        "https://passport.bilibili.com/x/passport-login/web/key",
+        headers=headers,
+        params=params_data
+    )
+    r_data = r.json()['data']
+    return r_data['hash'], r_data['key'], ''
 
 
 def get_capcha(sid):
@@ -163,7 +185,8 @@ def login(username, password):
     }
 
     r = requests.post(
-        "https://passport.bilibili.com/api/oauth2/login",
+        # "https://passport.bilibili.com/api/v3/oauth2/login",
+        "https://passport.bilibili.com/x/passport-login/oauth2/login",
         headers=headers,
         data=post_data,
         cookies={
@@ -173,7 +196,7 @@ def login(username, password):
     response = r.json()
     response_code = response['code']
     if response_code == 0:
-        login_data = response['data']
+        login_data = response['data']['token_info']
         return response_code, login_data['access_token'], login_data['refresh_token'], sid, login_data['mid'], login_data["expires_in"]
     elif response_code == -105: # captcha error, retry=5
         retry_cnt = 5
@@ -350,23 +373,20 @@ def upload_chunk(upload_url, server_file_name, local_file_name, chunk_data, chun
         'md5': (None, cipher.md5_bytes(chunk_data)),
         'file': (local_file_name, chunk_data, 'application/octet-stream')
     }
-    try:
-        r = requests.post(
-            url=upload_url,
-            files=files,
-            cookies={
-                'PHPSESSID': server_file_name
-            },
-            timeout=120
-        )
-        print(r.status_code)
-        print(r.content)
 
-        if r.status_code == 200 and r.json()['OK'] == 1:
-            return True
-        else:
-            return False
-    except Exception as e:
+    r = requests.post(
+        url=upload_url,
+        files=files,
+        cookies={
+            'PHPSESSID': server_file_name
+        },
+    )
+    print(r.status_code)
+    print(r.content)
+
+    if r.status_code == 200 and r.json()['OK'] == 1:
+        return True
+    else:
         return False
 
 
@@ -690,6 +710,15 @@ def edit_videos(
         'title': post_video_data["archive"]["title"],
         'videos': post_video_data["videos"]
     }
+
+    # cover
+    if os.path.isfile(cover):
+        try:
+            cover = upload_cover(access_token, sid, cover)
+        except:
+            cover = ''
+    else:
+        cover = ''
 
     # edit archive data
     if copyright:

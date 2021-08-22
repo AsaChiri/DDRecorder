@@ -178,7 +178,7 @@ class Processor(BiliLive):
     def split(self, split_interval: int = 3600) -> None:
         if split_interval <= 0:
             shutil.copy2(self.merged_file_path, os.path.join(
-                self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_0.mp4"))
+                self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_0000.mp4"))
             return
 
         duration = float(ffmpeg.probe(self.merged_file_path)
@@ -186,7 +186,7 @@ class Processor(BiliLive):
         num_splits = int(duration) // split_interval + 1
         for i in range(num_splits):
             output_file = os.path.join(
-                self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{i}.mp4")
+                self.splits_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{i:04}.mp4")
             cmd = f'ffmpeg -y -ss {i*split_interval} -t {split_interval} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
             _ = subprocess.run(cmd, shell=True, check=True,
                                stdout=self.ffmpeg_logfile_hander)

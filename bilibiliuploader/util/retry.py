@@ -8,7 +8,10 @@ class Retry:
     def run(self, func, *args, **kwargs):
         status = False
         for i in range(0, self.max_retry):
-            return_value = func(*args, **kwargs)
+            try:
+                return_value = func(*args, **kwargs)
+            except Exception:
+                return_value = not self.success_return_value
             if return_value == self.success_return_value:
                 status = True
                 break
