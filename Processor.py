@@ -109,7 +109,7 @@ class Processor(BiliLive):
             self.record_dir)
         self.merge_conf_path = utils.get_merge_conf_path(
             self.room_id, self.global_start, config.get('root', {}).get('data_path', "./"))
-        self.merged_file_path = utils.get_mergd_filename(
+        self.merged_file_path = utils.get_merged_filename(
             self.room_id, self.global_start, config.get('root', {}).get('data_path', "./"))
         self.outputs_dir = utils.init_outputs_dir(
             self.room_id, self.global_start, config.get('root', {}).get('data_path', "./"))
@@ -153,7 +153,7 @@ class Processor(BiliLive):
         self.live_duration = (
             self.times[-1][0]-self.times[0][0]).total_seconds()+self.times[-1][1]
 
-    def __cut_vedio(self, outhint: List[str], start_time: int, delta: int) -> subprocess.CompletedProcess:
+    def __cut_video(self, outhint: List[str], start_time: int, delta: int) -> subprocess.CompletedProcess:
         output_file = os.path.join(
             self.outputs_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{start_time:012}_{outhint}.mp4")
         cmd = f'ffmpeg -y -ss {start_time} -t {delta} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
@@ -172,7 +172,7 @@ class Processor(BiliLive):
             delta = end-start
             outhint = " ".join(tags)
             if delta >= min_length:
-                self.__cut_vedio(outhint, max(
+                self.__cut_video(outhint, max(
                     0, int(start)), int(delta))
 
     def split(self, split_interval: int = 3600) -> None:
