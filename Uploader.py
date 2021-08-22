@@ -99,7 +99,7 @@ class Uploader(BiliLive):
                                         'uploader', {}).get('thread_pool_workers', 1),
                                     max_retry=self.config.get('root', {}).get(
                                         'uploader', {}).get('max_retry', 10),
-                                    upload_by_edit=self.config.get('root', {}).get('uploader', {}).get('upload_by_edit', False) if )
+                                    upload_by_edit=self.config.get('root', {}).get('uploader', {}).get('upload_by_edit', False))
                 return_dict["clips"] = {
                     "avid": avid,
                     "bvid": bvid
