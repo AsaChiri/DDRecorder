@@ -132,6 +132,7 @@ class Processor(BiliLive):
     def pre_concat(self) -> None:
         filelist = os.listdir(self.record_dir)
         with open(self.merge_conf_path, "w", encoding="utf-8") as f:
+            ts_path_list = []
             for filename in filelist:
                 if os.path.splitext(
                         os.path.join(self.record_dir, filename))[1] == ".flv" and os.path.getsize(os.path.join(self.record_dir, filename)) > 1024*1024:
@@ -146,8 +147,11 @@ class Processor(BiliLive):
                                      'format']['duration'])
                     start_time = get_start_time(filename)
                     self.times.append((start_time, duration))
-                    f.write(
-                        f"file '{os.path.abspath(ts_path)}'\n")
+                    ts_path_list.append(os.path.abspath(ts_path))
+            ts_path_list.sort()
+            for full_ts_path in ts_path_list:
+                f.write(
+                    f"file '{full_ts_path}'\n")
         _ = concat(self.merge_conf_path, self.merged_file_path,
                    self.ffmpeg_logfile_hander)
         self.times.sort(key=lambda x: x[0])
