@@ -1,3 +1,5 @@
+**2021年10月8日起，B站更改了直播弹幕的压缩方式，目前本应用尚未适配，如有需要，可参考https://github.com/MoyuScript/bilibili-api 的实现。本应用后续版本也会基于前述第三方库开发，亿避免单独维护B站API调用的部分，感谢各位的支持。**
+
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
 
