@@ -10,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class BiliLive(BaseLive):
     def __init__(self, config: dict):
         super().__init__(config)
-        self.room_id = config.get('spec', {}).get('room_id', '')
+        self.room_id = config['spec']['room_id']
         self.site_name = 'BiliBili'
         self.site_domain = 'live.bilibili.com'
 
@@ -55,3 +55,15 @@ class BiliLive(BaseLive):
             logging.debug(self.generate_log("获取到以下地址："+durl['url']))
             live_urls.append(durl['url'])
         return live_urls
+
+    def get_room_conf(self):
+        data = {}
+        url = 'https://api.live.bilibili.com/room/v1/Danmu/getConf'
+        response = self.common_request('GET', url, {
+            'room_id': self.room_id
+        }).json()
+        logging.debug(self.generate_log("房间配置消息："+response['msg']))
+        if response['msg'] == 'ok':
+            data['available_hosts'] = response['data']['host_server_list']
+            data['token'] = response['data']['token']
+        return data
