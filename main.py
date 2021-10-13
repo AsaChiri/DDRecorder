@@ -11,7 +11,7 @@ from lastversion import lastversion
 import utils
 from MainRunner import MainThreadRunner
 
-CURRENT_VERSION = "1.1.6"
+CURRENT_VERSION = "1.1.9"
 
 class versionThread(threading.Thread):
     def __init__(self):

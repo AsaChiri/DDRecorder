@@ -18,7 +18,7 @@ class BiliDanmuRecorder(BiliLive):
         BiliLive.__init__(self, config)
         self.conf = self.get_room_conf()
         self.room_server_api = f"wss://{self.conf['available_hosts'][0]['host']}:{self.conf['available_hosts'][0]['wss_port']}/sub"
-        self.dir_name = utils.init_data_dir(self.room_id,global_start,config['root']['data_path'])
+        self.danmu_dir = utils.init_danmu_log_dir(self.room_id,global_start,config['root']['data_path'])
 
     def __pack(self,data: bytes, protocol_version: int, datapack_type: int):
         sendData = bytearray()
@@ -121,7 +121,7 @@ class BiliDanmuRecorder(BiliLive):
                     user_info=dict(enumerate(info.get(2,[])))
                     medal_info=dict(enumerate(info.get(3,[])))
                     ul_info=dict(enumerate(info.get(4,[])))
-                    danmu_writer = jsonlines.open(os.path.join(self.dir_name,"danmu.jsonl"),mode="a")
+                    danmu_writer = jsonlines.open(os.path.join(self.danmu_dir,"danmu.jsonl"),mode="a")
                     danmu_writer.write({
                         "raw":info,
                         "properties":{
@@ -155,7 +155,7 @@ class BiliDanmuRecorder(BiliLive):
                 elif jd['cmd'] == 'SEND_GIFT':
                     data = jd.get("data",{})
                     medal_info = data.get("medal_info",{})
-                    gift_writer = jsonlines.open(os.path.join(self.dir_name,"gift.jsonl"),mode="a")
+                    gift_writer = jsonlines.open(os.path.join(self.danmu_dir,"gift.jsonl"),mode="a")
                     gift_writer.write({
                         "raw":data,
                         "user_id":data.get("uid",0),
@@ -178,7 +178,7 @@ class BiliDanmuRecorder(BiliLive):
                     })
                 # elif jd['cmd'] == 'GUARD_BUY':
                 #     data = jd.get("data",{})
-                #     guard_writer = jsonlines.open(os.path.join(self.dir_name,"guard.jsonl"),mode="a")
+                #     guard_writer = jsonlines.open(os.path.join(self.danmu_dir,"guard.jsonl"),mode="a")
                 #     guard_writer.write({
                 #         "raw":data,
                 #         "user_id":data.get("uid",0),
@@ -192,7 +192,7 @@ class BiliDanmuRecorder(BiliLive):
                 #     })
                 elif jd['cmd'] == 'USER_TOAST_MSG':
                     data = jd.get("data",{})
-                    guard_writer = jsonlines.open(os.path.join(self.dir_name,"guard.jsonl"),mode="a")
+                    guard_writer = jsonlines.open(os.path.join(self.danmu_dir,"guard.jsonl"),mode="a")
                     guard_writer.write({
                         "raw":data,
                         "user_id":data.get("uid",0),
@@ -209,12 +209,12 @@ class BiliDanmuRecorder(BiliLive):
                 elif jd['cmd'] == 'PREPARING':
                     logging.info(self.generate_log(
                         '[Notice] LIVE Ended!\n'))
-                    with open(os.path.join(self.dir_name,"live_end_time"),"w",encoding="utf-8") as f:
+                    with open(os.path.join(self.danmu_dir,"live_end_time"),"w",encoding="utf-8") as f:
                         f.write(str(int(round(time.time()))))
                 elif jd['cmd'] == 'INTERACT_WORD':
                     data = jd.get("data",{})
                     medal_info = data.get("medal_info",{})
-                    interact_writer = jsonlines.open(os.path.join(self.dir_name,"interaction.jsonl"),mode="a")
+                    interact_writer = jsonlines.open(os.path.join(self.danmu_dir,"interaction.jsonl"),mode="a")
                     interact_writer.write({
                         "raw":data,
                         "user_id":data.get("uid",0),
@@ -233,7 +233,7 @@ class BiliDanmuRecorder(BiliLive):
                 elif jd['cmd'] == 'SUPER_CHAT_MESSAGE':
                     data = jd.get("data",{})
                     medal_info = data.get("medal_info",{})
-                    superchat_writer = jsonlines.open(os.path.join(self.dir_name,"superchat.jsonl"),mode="a")
+                    superchat_writer = jsonlines.open(os.path.join(self.danmu_dir,"superchat.jsonl"),mode="a")
                     superchat_writer.write({
                         "raw":data,
                         "text":data.get("message",""),
