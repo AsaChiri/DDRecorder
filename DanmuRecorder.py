@@ -213,7 +213,7 @@ class BiliDanmuRecorder(BiliLive):
                         f.write(str(int(round(time.time()))))
                 elif jd['cmd'] == 'INTERACT_WORD':
                     data = jd.get("data",{})
-                    medal_info = data.get("medal_info",{})
+                    medal_info = data.get("fans_medal",{})
                     interact_writer = jsonlines.open(os.path.join(self.danmu_dir,"interaction.jsonl"),mode="a")
                     interact_writer.write({
                         "raw":data,
