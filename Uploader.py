@@ -3,8 +3,8 @@ import os
 import logging
 import traceback
 
-from BilibiliUploader.bilibiliuploader.bilibiliuploader import BilibiliUploader
-from BilibiliUploader.bilibiliuploader.core import VideoPart
+from bilibiliuploader.bilibiliuploader import BilibiliUploader
+from bilibiliuploader.core import VideoPart
 
 from BiliLive import BiliLive
 import utils
