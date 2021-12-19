@@ -11,14 +11,14 @@ from lastversion import lastversion
 import utils
 from MainRunner import MainThreadRunner
 
-CURRENT_VERSION = "1.1.9"
+CURRENT_VERSION = "1.1.9.2"
 
 class versionThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
 
     def run(self):
-        latest_version = lastversion.has_update(repo="https://github.com.cnpmjs.org/AsaChiri/DDRecorder", current_version=CURRENT_VERSION)
+        latest_version = lastversion.has_update(repo="https://github.com/AsaChiri/DDRecorder", current_version=CURRENT_VERSION)
         if latest_version:
             print('DDRecorder有更新，版本号: {} 请尽快到https://github.com/AsaChiri/DDRecorder/releases 下载最新版'.format(str(latest_version)))
         else:
