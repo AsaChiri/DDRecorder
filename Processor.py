@@ -86,7 +86,7 @@ def count(danmu_list: List, live_start: datetime.datetime, live_duration: float,
 def flv2ts(input_file: str, output_file: str, ffmpeg_logfile_hander) -> Union[subprocess.CompletedProcess, subprocess.CalledProcessError]:
     try:
         ret = subprocess.run(
-            f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -f mpegts {output_file}", shell=True, check=True, stdout=ffmpeg_logfile_hander)
+            f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -acodec aac -f mpegts {output_file}", shell=True, check=True, stdout=ffmpeg_logfile_hander)
         return ret
     except subprocess.CalledProcessError as err:
         traceback.print_exc()
