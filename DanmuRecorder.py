@@ -13,12 +13,15 @@ from BiliLive import BiliLive
 import brotli
 import struct
 
-class BiliDanmuRecorder(BiliLive):
-    def __init__(self, config: dict, global_start: datetime.datetime):
-        BiliLive.__init__(self, config)
+class BiliDanmuRecorder:
+    def __init__(self, bl: BiliLive, global_start: datetime.datetime):
+        self.__bl = bl
         self.conf = self.get_room_conf()
         self.room_server_api = f"wss://{self.conf['available_hosts'][0]['host']}:{self.conf['available_hosts'][0]['wss_port']}/sub"
-        self.danmu_dir = utils.init_danmu_log_dir(self.room_id,global_start,config['root']['data_path'])
+        self.danmu_dir = utils.init_danmu_log_dir(self.room_id,global_start,self.config['root']['data_path'])
+
+    def __getattr__(self, name):
+        return object.__getattribute__(self.__bl, name)
 
     def __pack(self,data: bytes, protocol_version: int, datapack_type: int):
         sendData = bytearray()
