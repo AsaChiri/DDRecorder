@@ -1,0 +1,9 @@
+version: "3"
+services:
+  recorder:
+    build: .
+    volumes:
+      - ./config:/usr/src/app/config
+      - ./log:/usr/src/app/log
+      - ./data:/usr/src/app/data
+    restart: always
