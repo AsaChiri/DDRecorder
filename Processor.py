@@ -20,14 +20,16 @@ def parse_danmu(dir_name):
             for obj in reader:
                 danmu_list.append({
                     "text": obj['text'],
-                    "time": obj['properties']['time']//1000
+                    "time": obj['properties']['time']//1000,
+                    "uid":str(obj['user_info']['user_id'])
                 })
     if os.path.exists(os.path.join(dir_name, 'superchat.jsonl')):
         with jsonlines.open(os.path.join(dir_name, 'superchat.jsonl')) as reader:
             for obj in reader:
                 danmu_list.append({
                     "text": obj['text'],
-                    "time": obj['time']
+                    "time": obj['time'],
+                    "uid":str(obj['user_id'])
                 })
     danmu_list = sorted(danmu_list, key=lambda x: x['time'])
     return danmu_list
@@ -56,6 +58,22 @@ def get_cut_points(time_dict: Dict[datetime.datetime, List[str]], up_ratio: floa
             start_time = time
             temp_texts = copy.copy(texts)
         prev_num = len(texts)
+    return cut_points
+
+def get_manual_cut_points(danmu_list:List[Dict], uid: str) -> List[Tuple[datetime.datetime, datetime.datetime, List[str]]]:
+    cut_points = []
+    count = 0
+    for danmu_obj in danmu_list:
+        if danmu_obj['uid'] == uid and danmu_obj['text'].startswith("/DDR clip"):
+            count += 1
+            args = danmu_obj['text'].split()
+            duration = int(args[2])
+            end_time = datetime.datetime.fromtimestamp(danmu_obj['time'])
+            start_time = end_time - datetime.timedelta(seconds=duration)
+            hint_text = f"手动切片_{count}"
+            if len(args) >= 4:
+                hint_text = args[3]
+            cut_points.append((start_time,end_time,[hint_text]))
     return cut_points
 
 
@@ -156,7 +174,7 @@ class Processor(BiliLive):
                     f.write(
                         f"file '{os.path.abspath(ts_path)}'\n")
         ret = concat(self.merge_conf_path, self.merged_file_path,
-                   self.ffmpeg_logfile_hander)
+                     self.ffmpeg_logfile_hander)
         self.times.sort(key=lambda x: x[0])
         self.live_start = self.times[0][0]
         self.live_duration = (
@@ -189,7 +207,8 @@ class Processor(BiliLive):
             if delta >= min_length:
                 ret = self.__cut_video(outhint, max(
                     0, int(start)), int(delta))
-                success = success and isinstance(ret, subprocess.CompletedProcess)
+                success = success and isinstance(
+                    ret, subprocess.CompletedProcess)
         return success
 
     def split(self, split_interval: int = 3600) -> bool:
@@ -238,6 +257,11 @@ class Processor(BiliLive):
                 ret = self.cut(cut_points, self.config.get('spec', {}).get(
                     'clipper', {}).get('min_length', 60))
                 success = success and ret
+            if self.config.get('spec', {}).get('manual_clipper', {}).get('enabled', False):
+                danmu_list = parse_danmu(self.danmu_path)
+                cut_points = get_manual_cut_points(danmu_list,self.config.get('spec', {}).get('manual_clipper', {}).get('uid', ""))
+                ret = self.cut(cut_points, 0)
+                success = success and ret
             if self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False):
                 ret = self.split(self.config.get('spec', {}).get('uploader', {})
                                  .get('record', {}).get('split_interval', 3600))
@@ -250,8 +274,9 @@ class Processor(BiliLive):
 
 if __name__ == "__main__":
     danmu_list = parse_danmu("data/data/danmu/22603245_2021-03-13_11-20-16")
-    counted_danmu_dict = count(
-        danmu_list, datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2021-03-13_13-45-16", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
-    cut_points = get_cut_points(counted_danmu_dict, 2.5,
-                                0.75, 5)
+    # counted_danmu_dict = count(
+    #     danmu_list, datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2021-03-13_13-45-16", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
+    # cut_points = get_cut_points(counted_danmu_dict, 2.5,
+    #                             0.75, 5)
+    cut_points = get_manual_cut_points(danmu_list,"8559982")
     print(cut_points)

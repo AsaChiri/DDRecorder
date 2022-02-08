@@ -56,11 +56,11 @@ class BaseLive(metaclass=abc.ABCMeta):
     def get_live_urls(self):
         pass
 
-    def __check_live_status(self) -> bool:
-        room_info = self.get_room_info()
-        if room_info['status']:
+    def check_live_status(self) -> bool:
+        self.room_info = self.get_room_info()
+        if self.room_info['status']:
             logging.info(self.generate_log(
-                "直播间标题："+room_info['roomname']))
+                "直播间标题："+self.room_info['room_name']))
             return True
         else:
             logging.info(self.generate_log("等待开播"))
@@ -71,7 +71,7 @@ class BaseLive(metaclass=abc.ABCMeta):
         if datetime.datetime.now()-self.__last_check_time >= self.__allowed_check_interval:
             logging.debug(self.generate_log("允许检查"))
             try:
-                self.__live_status = self.__check_live_status()
+                self.__live_status = self.check_live_status()
                 self.__last_check_time = datetime.datetime.now()
             except Exception as e:
                 logging.error(self.generate_log(

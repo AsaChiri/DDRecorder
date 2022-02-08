@@ -10,7 +10,7 @@ from BiliLive import BiliLive
 import utils
 
 
-def upload(uploader: BilibiliUploader, parts: list, cr: int, title: str, tid: int, tags: list, desc: str, source: str, thread_pool_workers: int = 1, max_retry: int = 3, upload_by_edit: bool = False) -> tuple:
+def upload(uploader: BilibiliUploader, parts: list, cr: int, title: str, tid: int, tags: list, desc: str, source: str, cover: str, thread_pool_workers: int = 1, max_retry: int = 3, upload_by_edit: bool = False) -> tuple:
     bvid = None
     if upload_by_edit:
         while bvid is None:
@@ -22,6 +22,7 @@ def upload(uploader: BilibiliUploader, parts: list, cr: int, title: str, tid: in
                 tag=",".join(tags),
                 desc=desc,
                 source=source,
+                cover=cover,
                 thread_pool_workers=thread_pool_workers,
                 max_retry=max_retry,
             )
@@ -42,6 +43,7 @@ def upload(uploader: BilibiliUploader, parts: list, cr: int, title: str, tid: in
                 tag=",".join(tags),
                 desc=desc,
                 source=source,
+                cover=cover,
                 thread_pool_workers=thread_pool_workers,
                 max_retry=max_retry,
             )
@@ -55,8 +57,41 @@ class Uploader(BiliLive):
         self.output_dir = output_dir
         self.splits_dir = splits_dir
         self.uploader = BilibiliUploader()
-        self.uploader.login(config.get('spec', {}).get('uploader', {}).get('account', {}).get('username', ""),
-                            config.get('spec', {}).get('uploader', {}).get('account', {}).get('password', ""))
+        try:
+            if config.get('spec', {}).get('uploader', {}).get('account', {}).get('access_token', "") != "":
+                try:
+                    self.uploader.login_by_access_token(config.get('spec', {}).get('uploader', {}).get('account', {}).get(
+                        'access_token', ""), config.get('spec', {}).get('uploader', {}).get('account', {}).get('refresh_token', ""))
+                except Exception as e:
+                    logging.warn(self.generate_log(
+                        'Error while login with access token:' + str(e)+traceback.format_exc()))
+                    self.uploader.login(config.get('spec', {}).get('uploader', {}).get('account', {}).get('username', ""),
+                                        config.get('spec', {}).get('uploader', {}).get('account', {}).get('password', ""))
+                    if self.uploader.access_token is not None:
+                        self.uploader.save_login_data(utils.get_cred_filename(
+                            self.room_id, config.get('root', {}).get('data_path', "./")))
+            elif os.path.exists(utils.get_cred_filename(self.room_id, config.get('root', {}).get('data_path', "./"))):
+                try:
+                    self.uploader.login_by_access_token_file(utils.get_cred_filename(
+                        self.room_id, config.get('root', {}).get('data_path', "./")))
+                except Exception as e:
+                    logging.warn(self.generate_log(
+                        'Error while login with access token file:' + str(e)+traceback.format_exc()))
+                    self.uploader.login(config.get('spec', {}).get('uploader', {}).get('account', {}).get('username', ""),
+                                        config.get('spec', {}).get('uploader', {}).get('account', {}).get('password', ""))
+                    if self.uploader.access_token is not None:
+                        self.uploader.save_login_data(utils.get_cred_filename(
+                            self.room_id, config.get('root', {}).get('data_path', "./")))
+            else:
+                self.uploader.login(config.get('spec', {}).get('uploader', {}).get('account', {}).get('username', ""),
+                                    config.get('spec', {}).get('uploader', {}).get('account', {}).get('password', ""))
+                if self.uploader.access_token is not None:
+                    self.uploader.save_login_data(utils.get_cred_filename(
+                        self.room_id, config.get('root', {}).get('data_path', "./")))
+        except Exception as e:
+            logging.error(self.generate_log(
+                'Error while login:' + str(e)+traceback.format_exc()))
+
 
     def upload(self, global_start: datetime.datetime) -> dict:
         logging.basicConfig(level=utils.get_log_level(self.config),
@@ -80,21 +115,23 @@ class Uploader(BiliLive):
                         path=os.path.join(self.output_dir, filename),
                         title=title,
                         desc=self.config.get('spec', {}).get('uploader', {}).get('clips', {}).get('desc', "").format(
-                            date=datestr),
+                            date=datestr, year=global_start.year, month=global_start.month, day=global_start.day, hour=global_start.hour, minute=global_start.minute, second=global_start.second, rough_time=utils.get_rough_time(global_start.hour), room_name=self.room_info['room_name']),
                     ))
 
                 avid, bvid = upload(self.uploader, output_parts,
                                     cr=self.config.get('spec', {}).get(
                                         'uploader', {}).get('copyright', 2),
                                     title=self.config.get('spec', {}).get('uploader', {}).get('clips', {}).get('title', "").format(
-                                        date=datestr),
+                                        date=datestr, year=global_start.year, month=global_start.month, day=global_start.day, hour=global_start.hour, minute=global_start.minute, second=global_start.second, rough_time=utils.get_rough_time(global_start.hour), room_name=self.room_info['room_name']),
                                     tid=self.config.get('spec', {}).get(
                                         'uploader', {}).get('clips', {}).get('tid', 27),
                                     tags=self.config.get('spec', {}).get(
                                         'uploader', {}).get('clips', {}).get('tags', []),
                                     desc=self.config.get('spec', {}).get('uploader', {}).get('clips', {}).get('desc', "").format(
-                                        date=datestr),
+                                        date=datestr, year=global_start.year, month=global_start.month, day=global_start.day, hour=global_start.hour, minute=global_start.minute, second=global_start.second, rough_time=utils.get_rough_time(global_start.hour), room_name=self.room_info['room_name']),
                                     source="https://live.bilibili.com/"+self.room_id,
+                                    cover=self.config.get('spec', {}).get(
+                                        'uploader', {}).get('clips', {}).get('cover', ""),
                                     thread_pool_workers=self.config.get('root', {}).get(
                                         'uploader', {}).get('thread_pool_workers', 1),
                                     max_retry=self.config.get('root', {}).get(
@@ -117,21 +154,23 @@ class Uploader(BiliLive):
                         path=os.path.join(self.splits_dir, filename),
                         title=title,
                         desc=self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('desc', "").format(
-                            date=datestr),
+                            date=datestr, year=global_start.year, month=global_start.month, day=global_start.day, hour=global_start.hour, minute=global_start.minute, second=global_start.second, rough_time=utils.get_rough_time(global_start.hour), room_name=self.room_info['room_name']),
                     ))
 
                 avid, bvid = upload(self.uploader, splits_parts,
                                     cr=self.config.get('spec', {}).get(
                                         'uploader', {}).get('copyright', 2),
                                     title=self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('title', "").format(
-                                        date=datestr),
+                                        date=datestr, year=global_start.year, month=global_start.month, day=global_start.day, hour=global_start.hour, minute=global_start.minute, second=global_start.second, rough_time=utils.get_rough_time(global_start.hour), room_name=self.room_info['room_name']),
                                     tid=self.config.get('spec', {}).get(
                                         'uploader', {}).get('record', {}).get('tid', 27),
                                     tags=self.config.get('spec', {}).get(
                                         'uploader', {}).get('record', {}).get('tags', []),
                                     desc=self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('desc', "").format(
-                                        date=datestr),
+                                        date=datestr, year=global_start.year, month=global_start.month, day=global_start.day, hour=global_start.hour, minute=global_start.minute, second=global_start.second, rough_time=utils.get_rough_time(global_start.hour), room_name=self.room_info['room_name']),
                                     source="https://live.bilibili.com/"+self.room_id,
+                                    cover=self.config.get('spec', {}).get(
+                                        'uploader', {}).get('record', {}).get('cover', ""),
                                     thread_pool_workers=self.config.get('root', {}).get(
                                         'uploader', {}).get('thread_pool_workers', 1),
                                     max_retry=self.config.get('root', {}).get(

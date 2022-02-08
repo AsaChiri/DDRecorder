@@ -13,6 +13,7 @@ class BiliLive(BaseLive):
         self.room_id = config['spec']['room_id']
         self.site_name = 'BiliBili'
         self.site_domain = 'live.bilibili.com'
+        self.check_live_status()
 
     def get_room_info(self) -> dict:
         data = {}
@@ -23,7 +24,7 @@ class BiliLive(BaseLive):
         }).json()
         logging.debug(self.generate_log("房间API消息："+response['msg']))
         if response['msg'] == 'ok':
-            data['roomname'] = response['data']['title']
+            data['room_name'] = response['data']['title']
             data['site_name'] = self.site_name
             data['site_domain'] = self.site_domain
             data['status'] = response['data']['live_status'] == 1

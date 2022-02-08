@@ -130,4 +130,4 @@ config/*
 !config/config.json
 
 # vscode
-.vscode
+.vscode/
