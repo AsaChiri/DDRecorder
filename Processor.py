@@ -72,7 +72,7 @@ def get_manual_cut_points(danmu_list:List[Dict], uid: str) -> List[Tuple[datetim
             start_time = end_time - datetime.timedelta(seconds=duration)
             hint_text = f"手动切片_{count}"
             if len(args) >= 4:
-                hint_text = args[3]
+                hint_text = " ".join(args[3:])
             cut_points.append((start_time,end_time,[hint_text]))
     return cut_points
 
@@ -247,6 +247,12 @@ class Processor(BiliLive):
             # self.live_start = self.times[0][0]
             # self.live_duration = (
             #     self.times[-1][0]-self.times[0][0]).total_seconds()+self.times[-1][1]
+
+            if not self.config.get('spec', {}).get('clipper', {}).get('enable_clipper', False) and not self.config.get('spec', {}).get('manual_clipper', {}).get('enabled', False):
+                os.rmdir(self.outputs_dir)
+
+            if not self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False):
+                os.rmdir(self.splits_dir)
 
             if self.config.get('spec', {}).get('clipper', {}).get('enable_clipper', False):
                 danmu_list = parse_danmu(self.danmu_path)
