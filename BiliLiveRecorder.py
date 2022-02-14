@@ -13,11 +13,14 @@ from BiliLive import BiliLive
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-class BiliLiveRecorder(BiliLive):
-    def __init__(self, config: dict, global_start: datetime.datetime):
-        BiliLive.__init__(self, config)
+class BiliLiveRecorder:
+    def __init__(self, bl: BiliLive, global_start: datetime.datetime):
+        self.__bl = bl
         self.record_dir = utils.init_record_dir(
-            self.room_id, global_start, config.get('root', {}).get('data_path', "./"))
+            self.room_id, global_start, self.config.get('root', {}).get('data_path', "./"))
+
+    def __getattr__(self, name):
+        return object.__getattribute__(self.__bl, name)
 
     def record(self, record_url: str, output_filename: str) -> None:
         try:
