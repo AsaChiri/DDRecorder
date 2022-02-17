@@ -39,16 +39,16 @@ class MainRunner():
             if u.uploader.access_token is None:
                 current_state.value = int(utils.state.ERROR)
                 state_change_time.value = time.time()
-                return
-            d = u.upload(p.global_start)
-            if not config.get('spec', {}).get('uploader', {}).get('record', {}).get('keep_record_after_upload', True) and d.get("record", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
-                rc = BiliVideoChecker(d['record']['bvid'],
-                                      p.splits_dir, config)
-                rc.start()
-            if not config.get('spec', {}).get('uploader', {}).get('clips', {}).get('keep_clips_after_upload', True) and d.get("clips", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
-                cc = BiliVideoChecker(d['clips']['bvid'],
-                                      p.outputs_dir, config)
-                cc.start()
+            else:
+                d = u.upload(p.global_start)
+                if not config.get('spec', {}).get('uploader', {}).get('record', {}).get('keep_record_after_upload', True) and d.get("record", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
+                    rc = BiliVideoChecker(d['record']['bvid'],
+                                        p.splits_dir, config)
+                    rc.start()
+                if not config.get('spec', {}).get('uploader', {}).get('clips', {}).get('keep_clips_after_upload', True) and d.get("clips", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
+                    cc = BiliVideoChecker(d['clips']['bvid'],
+                                        p.outputs_dir, config)
+                    cc.start()
 
         if config.get('root', {}).get('enable_baiduyun', False) and config.get('spec', {}).get('backup', False):
             current_state.value = int(utils.state.UPLOADING_TO_BAIDUYUN)
@@ -101,8 +101,8 @@ class MainRunner():
                         self.bl.__live_status = self.check_live_status()
                         self.bl.__last_check_time = datetime.datetime.now()
                     except Exception as e:
-                        logging.error(self.generate_log(
-                            "Status Error"+str(e)+traceback.format_exc()))
+                        logging.error(
+                            "Status Error"+str(e)+traceback.format_exc())
                 else:
                     time.sleep(self.config.get(
                         'root', {}).get('check_interval', 60))
