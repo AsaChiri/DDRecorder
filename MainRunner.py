@@ -98,11 +98,11 @@ class MainRunner():
                         self.config, self.blr.record_dir, self.bdr.danmu_dir, self.current_state, self.state_change_time))
                     proc_process.start()
                     try:
-                        self.bl.__live_status = self.check_live_status()
+                        self.bl.__live_status = self.bl.check_live_status()
                         self.bl.__last_check_time = datetime.datetime.now()
                     except Exception as e:
-                        logging.error(self.generate_log(
-                            "Status Error"+str(e)+traceback.format_exc()))
+                        logging.error(
+                            "Status Error"+str(e)+traceback.format_exc())
                 else:
                     time.sleep(self.config.get(
                         'root', {}).get('check_interval', 60))
