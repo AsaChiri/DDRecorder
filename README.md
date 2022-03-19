@@ -61,7 +61,7 @@ ForgQi/biliup-rs
   - log_level: 日志级别，可选DEBUG\INFO\WARN
 - request_header: 请求时使用的头。代码中已经包含了一个默认的，在这里进行调整将会覆盖默认值，如无必要请留空。
 - uploader: 上传器相关设置
-  - upload_by_edit：通过编辑稿件的方法上传多P切片，可以让后续分P上传时让前面的分P进入审核队列，加快开放浏览的速度。**请注意打开此功能时，请保持keep_record_after_upload和keep_clippers_after_upload为False。否则，keep_record_after_upload和keep_clippers_after_upload设置项将无效。**
+  - upload_by_edit：通过编辑稿件的方法上传多P切片，可以让后续分P上传时让前面的分P进入审核队列，加快开放浏览的速度。**请注意打开此功能时，请保持keep_record_after_upload和keep_clippers_after_upload为True。否则，keep_record_after_upload和keep_clippers_after_upload设置项将无效。**
   - thread_pool_workers: 上传时的线程池大小。默认：1
   - max_retry: 最大重试次数。默认：10
 - enable_baiduyun：是否开启百度云功能。
