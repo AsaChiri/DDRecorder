@@ -95,15 +95,18 @@ def get_merge_conf_path(room_id: str, global_start: datetime.datetime, root_dir:
                             f"{room_id}_{global_start.strftime('%Y-%m-%d_%H-%M-%S')}_merge_conf.txt")
     return filename
 
+
 def get_cred_filename(room_id: str, root_dir: str = os.getcwd()) -> str:
     filename = os.path.join(root_dir, 'data', 'cred',
                             f"{room_id}_cred.json")
     return filename
 
+
 def del_files_and_dir(dirs: str) -> None:
     for filename in os.listdir(dirs):
         os.remove(os.path.join(dirs, filename))
     os.rmdir(dirs)
+
 
 def get_rough_time(hour: int) -> str:
     if 0 <= hour < 6:
@@ -114,6 +117,7 @@ def get_rough_time(hour: int) -> str:
         return "下午"
     else:
         return "晚上"
+
 
 def refresh_reg() -> None:
     HWND_BROADCAST = 0xFFFF
@@ -180,7 +184,7 @@ def get_words(txt, topK=5):
     seg_list = jieba.cut(txt)  # 对文本进行分词
     c = Counter()
     for x in seg_list:  # 进行词频统计
-        if len(x) > 1 and x != '\r\n':
+        if len(x) > 1 and x != '\r\n' and x != '\n':
             c[x] += 1
     try:
         return list(list(zip(*c.most_common(topK)))[0])
