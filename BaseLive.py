@@ -56,7 +56,7 @@ class BaseLive(metaclass=abc.ABCMeta):
     def get_live_urls(self):
         pass
 
-    def check_live_status(self) -> bool:
+    def __check_live_status(self) -> bool:
         self.room_info = self.get_room_info()
         if self.room_info['status']:
             logging.info(self.generate_log(
@@ -66,23 +66,23 @@ class BaseLive(metaclass=abc.ABCMeta):
             logging.info(self.generate_log("等待开播"))
         return False
 
+    def check_live_status(self) -> bool:
+        try:
+            self.__live_status = self.__check_live_status()
+            self.__last_check_time = datetime.datetime.now()
+        except Exception as e:
+            logging.error(self.generate_log(
+                "Status Error" + str(e) + traceback.format_exc()))
+        return self.__live_status
+
     @property
     def live_status(self) -> bool:
         if datetime.datetime.now()-self.__last_check_time >= self.__allowed_check_interval:
             logging.debug(self.generate_log("允许检查"))
-            try:
-                self.__live_status = self.check_live_status()
-                self.__last_check_time = datetime.datetime.now()
-            except Exception as e:
-                logging.error(self.generate_log(
-                    "Status Error"+str(e)+traceback.format_exc()))
+            self.check_live_status()
         else:
             logging.debug(self.generate_log("间隔不足，使用过去状态"))
         return self.__live_status
-
-    @live_status.setter
-    def live_status(self, status: bool):
-        self.__live_status = status
 
     def generate_log(self, content: str = '') -> str:
         return f"[Site:{self.site_name} Room:{self.room_id}] {content}"
