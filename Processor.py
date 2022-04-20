@@ -183,8 +183,10 @@ class Processor(BiliLive):
         return ret
 
     def __cut_video(self, outhint: List[str], start_time: int, delta: int) -> Union[subprocess.CompletedProcess, subprocess.CalledProcessError]:
+        hours, remainder = divmod(start_time, 3600)
+        minutes, seconds = divmod(remainder, 60)
         output_file = os.path.join(
-            self.outputs_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{start_time:012}_{outhint}.mp4")
+            self.outputs_dir, f"{self.room_id}_{self.global_start.strftime('%Y-%m-%d_%H-%M-%S')}_{hours:02}-{minutes:02}-{seconds:02}_{outhint}.mp4")
         cmd = f'ffmpeg -y -ss {start_time} -t {delta} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
         try:
             ret = subprocess.run(cmd, shell=True, check=True,
