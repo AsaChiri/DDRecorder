@@ -86,7 +86,7 @@ ForgQi/biliup-rs
     - cookies:
       - SESSDATA: your SESSDATA
       - bili_jct: your bili_jct
-      - DedeUserID: "your DedeUserID
+      - DedeUserID: your DedeUserID
       - DedeUserID__ckMd5: your DedeUserID__ckMd5
       - sid: your sid
   - copyright: 稿件类型（1：自制，2：转载）**警告！未经授权投稿“自制”可能导致稿件无法通过审核！**
