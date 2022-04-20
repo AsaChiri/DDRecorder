@@ -21,7 +21,7 @@ def parse_danmu(dir_name):
                 danmu_list.append({
                     "text": obj['text'],
                     "time": obj['properties']['time']//1000,
-                    "uid":str(obj['user_info']['user_id'])
+                    "uid": str(obj['user_info']['user_id'])
                 })
     if os.path.exists(os.path.join(dir_name, 'superchat.jsonl')):
         with jsonlines.open(os.path.join(dir_name, 'superchat.jsonl')) as reader:
@@ -29,7 +29,7 @@ def parse_danmu(dir_name):
                 danmu_list.append({
                     "text": obj['text'],
                     "time": obj['time'],
-                    "uid":str(obj['user_id'])
+                    "uid": str(obj['user_id'])
                 })
     danmu_list = sorted(danmu_list, key=lambda x: x['time'])
     return danmu_list
@@ -60,7 +60,8 @@ def get_cut_points(time_dict: Dict[datetime.datetime, List[str]], up_ratio: floa
         prev_num = len(texts)
     return cut_points
 
-def get_manual_cut_points(danmu_list:List[Dict], uid: str) -> List[Tuple[datetime.datetime, datetime.datetime, List[str]]]:
+
+def get_manual_cut_points(danmu_list: List[Dict], uid: str) -> List[Tuple[datetime.datetime, datetime.datetime, List[str]]]:
     cut_points = []
     count = 0
     for danmu_obj in danmu_list:
@@ -73,7 +74,7 @@ def get_manual_cut_points(danmu_list:List[Dict], uid: str) -> List[Tuple[datetim
             hint_text = f"手动切片_{count}"
             if len(args) >= 4:
                 hint_text = " ".join(args[3:])
-            cut_points.append((start_time,end_time,[hint_text]))
+            cut_points.append((start_time, end_time, [hint_text]))
     return cut_points
 
 
@@ -104,7 +105,7 @@ def count(danmu_list: List, live_start: datetime.datetime, live_duration: float,
 def flv2ts(input_file: str, output_file: str, ffmpeg_logfile_hander) -> Union[subprocess.CompletedProcess, subprocess.CalledProcessError]:
     try:
         ret = subprocess.run(
-            f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -acodec aac -f mpegts {output_file}", shell=True, check=True, stdout=ffmpeg_logfile_hander)
+            f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -acodec aac -f mpegts {output_file}", shell=True, check=True, stdout=ffmpeg_logfile_hander, stderr=ffmpeg_logfile_hander)
         return ret
     except subprocess.CalledProcessError as err:
         traceback.print_exc()
@@ -114,7 +115,7 @@ def flv2ts(input_file: str, output_file: str, ffmpeg_logfile_hander) -> Union[su
 def concat(merge_conf_path: str, merged_file_path: str, ffmpeg_logfile_hander) -> Union[subprocess.CompletedProcess, subprocess.CalledProcessError]:
     try:
         ret = subprocess.run(
-            f"ffmpeg -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True, stdout=ffmpeg_logfile_hander)
+            f"ffmpeg -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}", shell=True, check=True, stdout=ffmpeg_logfile_hander, stderr=ffmpeg_logfile_hander)
         return ret
     except subprocess.CalledProcessError as err:
         traceback.print_exc()
@@ -187,7 +188,7 @@ class Processor(BiliLive):
         cmd = f'ffmpeg -y -ss {start_time} -t {delta} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
         try:
             ret = subprocess.run(cmd, shell=True, check=True,
-                                 stdout=self.ffmpeg_logfile_hander)
+                                 stdout=self.ffmpeg_logfile_hander, stderr=self.ffmpeg_logfile_hander)
             return ret
         except subprocess.CalledProcessError as err:
             traceback.print_exc()
@@ -227,7 +228,7 @@ class Processor(BiliLive):
             cmd = f'ffmpeg -y -ss {i*split_interval} -t {split_interval} -accurate_seek -i "{self.merged_file_path}" -c copy -avoid_negative_ts 1 "{output_file}"'
             try:
                 _ = subprocess.run(cmd, shell=True, check=True,
-                                   stdout=self.ffmpeg_logfile_hander)
+                                   stdout=self.ffmpeg_logfile_hander, stderr=self.ffmpeg_logfile_hander)
             except subprocess.CalledProcessError:
                 traceback.print_exc()
                 success = False
@@ -265,7 +266,8 @@ class Processor(BiliLive):
                 success = success and ret
             if self.config.get('spec', {}).get('manual_clipper', {}).get('enabled', False):
                 danmu_list = parse_danmu(self.danmu_path)
-                cut_points = get_manual_cut_points(danmu_list,self.config.get('spec', {}).get('manual_clipper', {}).get('uid', ""))
+                cut_points = get_manual_cut_points(danmu_list, self.config.get(
+                    'spec', {}).get('manual_clipper', {}).get('uid', ""))
                 ret = self.cut(cut_points, 0)
                 success = success and ret
             if self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False):
@@ -284,5 +286,5 @@ if __name__ == "__main__":
     #     danmu_list, datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2021-03-13_13-45-16", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
     # cut_points = get_cut_points(counted_danmu_dict, 2.5,
     #                             0.75, 5)
-    cut_points = get_manual_cut_points(danmu_list,"8559982")
+    cut_points = get_manual_cut_points(danmu_list, "8559982")
     print(cut_points)
