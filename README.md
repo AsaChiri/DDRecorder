@@ -9,7 +9,7 @@ ForgQi/biliup-rs
 
 ## 安装指南（Windows）
 1. 在Release下载zip包解压。
-2. 修改配置文件config.json
+2. 修改配置文件config.json 可以选择使用自带的DDRecorderConfigManager（源码：AsaChiri/DDRecorderConfigManager)
 3. 双击运行DDRecorder.exe （这将使用config.json）或 DDRecorder.exe <配置文件> 
 
 
@@ -24,7 +24,7 @@ ForgQi/biliup-rs
 
 ### 关于登录
 
-**由于B站风控原因，账号密码登录失败（被风控）的可能性极高，建议获取access_token，refresh_token和cookies项目填入配置文件中；目前推荐使用[biliup-rs](https://github.com/ForgQi/biliup-rs)进行一次登录获取access_token，refresh_token和cookies项目后填入配置文件中。**
+**由于B站风控原因，账号密码登录失败（被风控）的可能性极高，建议获取access_token，refresh_token和cookies项目填入配置文件中；目前推荐使用[biliup-rs](https://github.com/ForgQi/biliup-rs)进行一次登录获取access_token，refresh_token和cookies项目后填入配置文件中。如果您使用DDRecorderConfigManager，则相应功能已经集成。**
 
 ### 关于占位符
 目前可以在配置文件里使用的占位符如下：
