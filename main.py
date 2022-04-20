@@ -12,7 +12,7 @@ import utils
 from MainRunner import MainThreadRunner
 
 
-CURRENT_VERSION = "1.2.2"
+CURRENT_VERSION = "1.2.3"
 
 
 
