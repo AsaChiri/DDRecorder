@@ -35,20 +35,25 @@ class MainRunner():
         if config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False) or config.get('spec', {}).get('uploader', {}).get('clips', {}).get('upload_clips', False):
             current_state.value = int(utils.state.UPLOADING_TO_BILIBILI)
             state_change_time.value = time.time()
-            u = Uploader(p.outputs_dir, p.splits_dir, config)
-            if u.uploader.access_token is None:
+            try:
+                u = Uploader(p.outputs_dir, p.splits_dir, config)
+                d = u.upload(p.global_start)
+            except Exception as e:
                 current_state.value = int(utils.state.ERROR)
                 state_change_time.value = time.time()
-                return
-            d = u.upload(p.global_start)
-            if not config.get('spec', {}).get('uploader', {}).get('record', {}).get('keep_record_after_upload', True) and d.get("record", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
-                rc = BiliVideoChecker(d['record']['bvid'],
-                                      p.splits_dir, config)
-                rc.start()
-            if not config.get('spec', {}).get('uploader', {}).get('clips', {}).get('keep_clips_after_upload', True) and d.get("clips", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
-                cc = BiliVideoChecker(d['clips']['bvid'],
-                                      p.outputs_dir, config)
-                cc.start()
+
+            if d is None:
+                current_state.value = int(utils.state.ERROR)
+                state_change_time.value = time.time()
+            else:
+                if not config.get('spec', {}).get('uploader', {}).get('record', {}).get('keep_record_after_upload', True) and d.get("record", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
+                    rc = BiliVideoChecker(d['record']['bvid'],
+                                        p.splits_dir, config)
+                    rc.start()
+                if not config.get('spec', {}).get('uploader', {}).get('clips', {}).get('keep_clips_after_upload', True) and d.get("clips", None) is not None and not config.get('root', {}).get('uploader', {}).get('upload_by_edit', False):
+                    cc = BiliVideoChecker(d['clips']['bvid'],
+                                        p.outputs_dir, config)
+                    cc.start()
 
         if config.get('root', {}).get('enable_baiduyun', False) and config.get('spec', {}).get('backup', False):
             current_state.value = int(utils.state.UPLOADING_TO_BAIDUYUN)
