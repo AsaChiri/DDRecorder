@@ -1,11 +1,11 @@
-aiowebsocket>=1.0.0.dev2
 biliup>=0.2.11
 brotli>=1.0.9
 brotlipy>=0.7.0
 bypy>=1.7.12
 jieba>=0.42.1
 jsonlines>=3.0.0
-lastversion>=2.0.1
-prettytable>=3.0.0
+lastversion>=2.4.2
+prettytable>=3.2.0
 requests>=2.27.1
-urllib3>=1.26.8
+urllib3>=1.26.9
+websockets>=10.2
