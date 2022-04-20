@@ -13,6 +13,7 @@ class BiliLive(BaseLive):
         self.room_id = config['spec']['room_id']
         self.site_name = 'BiliBili'
         self.site_domain = 'live.bilibili.com'
+        self.get_room_info()
         self.check_live_status()
 
     def get_room_info(self) -> dict:
