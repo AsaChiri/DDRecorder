@@ -14,7 +14,7 @@ ForgQi/biliup-rs
 
 
 ## 安装指南（MacOS/Linux）
-1. 安装Python >= 3.8 https://www.python.org/downloads/release/python-386/
+1. 安装Python >= 3.8 https://www.python.org/downloads/release/python-3104/
 2. 安装ffmpeg https://ffmpeg.org/download.html
 3. 执行pip install -r requirements.txt
 4. 修改config文件夹下的配置文件config.json
