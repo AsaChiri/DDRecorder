@@ -1,5 +1,3 @@
-**2021年10月8日起，B站更改了直播弹幕的压缩方式，目前本应用已完成适配，感谢各位的支持。**
-
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
 **>=1.1.2版本增加了自动检查更新功能，需要连接至Github服务器，敬请留意。**
@@ -16,7 +14,7 @@ ForgQi/biliup-rs
 
 
 ## 安装指南（MacOS/Linux）
-1. 安装Python >= 3.7 https://www.python.org/downloads/release/python-386/
+1. 安装Python >= 3.8 https://www.python.org/downloads/release/python-386/
 2. 安装ffmpeg https://ffmpeg.org/download.html
 3. 执行pip install -r requirements.txt
 4. 修改config文件夹下的配置文件config.json
@@ -25,12 +23,8 @@ ForgQi/biliup-rs
 ## 配置文件字段解释
 
 ### 关于登录
-登录部分采用的凭证优先级如下：
-1. 配置文件中提供的access_token和refresh_token
-2. 上一次使用账号密码成功登录所取得的access_token和refresh_token
-3. 账号和密码
 
-**由于B站风控原因，账号密码登录失败（被风控）的可能性极高，建议获取access_token和refresh_token填入配置文件中；目前推荐使用[biliup-rs](https://github.com/ForgQi/biliup-rs)进行一次登录获取access_token和refresh_token后填入配置文件中。**
+**由于B站风控原因，账号密码登录失败（被风控）的可能性极高，建议获取access_token，refresh_token和cookies项目填入配置文件中；目前推荐使用[biliup-rs](https://github.com/ForgQi/biliup-rs)进行一次登录获取access_token，refresh_token和cookies项目后填入配置文件中。**
 
 ### 关于占位符
 目前可以在配置文件里使用的占位符如下：
@@ -60,10 +54,10 @@ ForgQi/biliup-rs
   - log_path: 日志文件路径。默认："./log"
   - log_level: 日志级别，可选DEBUG\INFO\WARN
 - request_header: 请求时使用的头。代码中已经包含了一个默认的，在这里进行调整将会覆盖默认值，如无必要请留空。
-- uploader: 上传器相关设置
+<!-- - uploader: 上传器相关设置
   - upload_by_edit：通过编辑稿件的方法上传多P切片，可以让后续分P上传时让前面的分P进入审核队列，加快开放浏览的速度。**请注意打开此功能时，请保持keep_record_after_upload和keep_clippers_after_upload为True。否则，keep_record_after_upload和keep_clippers_after_upload设置项将无效。**
   - thread_pool_workers: 上传时的线程池大小。默认：1
-  - max_retry: 最大重试次数。默认：10
+  - max_retry: 最大重试次数。默认：10 -->
 - enable_baiduyun：是否开启百度云功能。
 
 ### 直播间特定设置（spec部分，此部分是一个数组，如果需要同时监控多个直播间，依次添加至数组中即可）
@@ -89,6 +83,12 @@ ForgQi/biliup-rs
     - password: 密码
     - access_token: Access token 
     - refresh_token: Refresh token
+    - cookies:
+      - SESSDATA: your SESSDATA
+      - bili_jct: your bili_jct
+      - DedeUserID: "your DedeUserID
+      - DedeUserID__ckMd5: your DedeUserID__ckMd5
+      - sid: your sid
   - copyright: 稿件类型（1：自制，2：转载）**警告！未经授权投稿“自制”可能导致稿件无法通过审核！**
   - record: 录播上传设置
     - upload_record: 是否上传录播。默认：true
@@ -110,16 +110,11 @@ ForgQi/biliup-rs
 - backup：是否将录像备份到百度云。
 
 ## 已知问题
-- merged文件下下文件不会在备份到百度云后自动删除。（已解决，请更新bypy）
-- record文件夹下产生大量空文件夹。（试图修复，通过在检测到断流后立刻检查开播状态实现。）
-- 录播分P顺序问题。（已修复）
-- 通过编辑稿件的方法上传多P稿件功能与自动在过审后清理文件功能存在冲突。（已修复）
+- record文件夹下产生大量空文件夹。（Work-around patch）
 - 被B站风控系统412后会无法工作。（预期下个功能更新优化。）
-- 自动上传无法登录。（暂时解决，请更新BilibiliUploader）
+- 自动上传无法登录，电磁力不足无法投稿分P稿件。（已更新）
 
 ## 预期更新
 - 弹幕jsonl转为ass字幕并自动压入录播文件的功能。（预期下个功能更新。）
 - 不上传百度也会在切片和或录播上传完成后删去merge文件的功能。（_预期下个功能更新。说实话不是很想加这个功能，可能这就是仓鼠症患者吧……_）
-- 根据网络状况自动选择弹幕服务器。（已更新。）
-- 增加直播间名称作为投稿标题和简介中模板填充字段。（已更新，可以使用{room_name}。）
 - 增加斗鱼、Twitch和油管支持。（预期当前功能稳定后加入。）
