@@ -1,6 +1,8 @@
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
+ 
 **>=1.1.2版本增加了自动检查更新功能，需要连接至Github服务器，敬请留意。**
+
 _使用Bert+WTB语料库（基于fastHan库）进行弹幕分词的工作在asachiri/fasthan-dev分支下进行开发，欢迎大家测试反馈意见。_
 
 ## 感谢
