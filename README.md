@@ -1,11 +1,24 @@
 # DDRecorder
  Headless全自动B站直播录播、切片、上传一体工具
-**>=1.1.2版本增加了自动检查更新功能，需要连接至Github服务器，敬请留意。**
+**这是有关弹幕关键词改用FastHan框架以更好地提取弹幕关键词的开发分支。稳定主分支请见main分支。**
  
 ## 感谢
 FortuneDayssss/BilibiliUploader
 MoyuScript/bilibili-api
 ForgQi/biliup-rs
+fastnlp/fastHan
+
+## 参考文献
+```
+@inproceedings{geng-etal-2021-fasthan,
+  author = {Geng, Zhichao and Yan, Hang and Qiu, Xipeng and Huang, Xuanjing},
+  title = {fastHan: A BERT-based Multi-Task Toolkit for Chinese NLP},
+  booktitle = {Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing: System Demonstrations},
+  year = {2021},
+  pages = {99--106}, 
+  url = {https://aclanthology.org/2021.acl-demo.12}
+}
+```
 
 ## 安装指南（Windows）
 1. 在Release下载zip包解压。
