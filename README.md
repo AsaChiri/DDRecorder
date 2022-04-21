@@ -68,10 +68,16 @@ fastnlp/fastHan
   - log_path: 日志文件路径。默认："./log"
   - log_level: 日志级别，可选 DEBUG\INFO\WARN
 - request_header: 请求时使用的头。代码中已经包含了一个默认的，在这里进行调整将会覆盖默认值，如无必要请留空。
+<<<<<<< HEAD
 <!-- - uploader: 上传器相关设置
   - upload_by_edit：通过编辑稿件的方法上传多 P 切片，可以让后续分 P 上传时让前面的分 P 进入审核队列，加快开放浏览的速度。**请注意打开此功能时，请保持 keep_record_after_upload 和 keep_clippers_after_upload 为 True。否则，keep_record_after_upload 和 keep_clippers_after_upload 设置项将无效。**
+=======
+- uploader: 上传器相关设置
+  <!-- - upload_by_edit：通过编辑稿件的方法上传多 P 切片，可以让后续分 P 上传时让前面的分 P 进入审核队列，加快开放浏览的速度。**请注意打开此功能时，请保持 keep_record_after_upload 和 keep_clippers_after_upload 为 True。否则，keep_record_after_upload 和 keep_clippers_after_upload 设置项将无效。**
+>>>>>>> 4bee7c3 (Feat: Use Fasthan (bert+wtb) to split text)
   - thread_pool_workers: 上传时的线程池大小。默认：1
   - max_retry: 最大重试次数。默认：10 -->
+  - lines: 上传使用的线路，可以选择 bda2, kodo, ws, qn, cos, cos-internal(支持腾讯云内网免流 + 提速)
 - enable_baiduyun：是否开启百度云功能。
 
 ### 直播间特定设置（spec 部分，此部分是一个数组，如果需要同时监控多个直播间，依次添加至数组中即可）
