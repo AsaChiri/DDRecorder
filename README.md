@@ -1,7 +1,8 @@
 # DDRecorder
  Headless 全自动 B 站直播录播、切片、上传一体工具
-**这是有关弹幕关键词改用 FastHan 框架以更好地提取弹幕关键词的开发分支。稳定主分支请见 main 分支。**
  
+**>=1.1.2 版本增加了自动检查更新功能，需要连接至 Github 服务器，敬请留意。**
+
 ## 感谢
 FortuneDayssss/BilibiliUploader
 MoyuScript/bilibili-api
