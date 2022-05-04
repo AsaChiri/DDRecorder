@@ -202,9 +202,9 @@ class Processor(BiliLive):
                          ['format']['duration'])
         for cut_start, cut_end, tags in cut_points:
             start = get_true_timestamp(self.times,
-                                       cut_start) + self.config['spec']['clipper']['start_offset']
+                                       cut_start) + self.config.get('spec', {}).get('clipper', {}).get('start_offset', 0)
             end = min(get_true_timestamp(self.times,
-                                         cut_end) + self.config['spec']['clipper']['end_offset'], duration)
+                                         cut_end) + self.config.get('spec', {}).get('clipper', {}).get('end_offset', 0), duration)
             delta = end-start
             outhint = " ".join(tags)
             if delta >= min_length:
