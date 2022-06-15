@@ -61,19 +61,20 @@ def get_cut_points(time_dict: Dict[datetime.datetime, List[str]], up_ratio: floa
     return cut_points
 
 
-def get_manual_cut_points(danmu_list: List[Dict], uid: str) -> List[Tuple[datetime.datetime, datetime.datetime, List[str]]]:
+def get_manual_cut_points(danmu_list: List[Dict], uid: str, command: str) -> List[Tuple[datetime.datetime, datetime.datetime, List[str]]]:
     cut_points = []
     count = 0
     for danmu_obj in danmu_list:
-        if danmu_obj['uid'] == uid and danmu_obj['text'].startswith("/DDR clip"):
+        # /COMMAND DURATION [HINT]
+        if danmu_obj['uid'] == uid and danmu_obj['text'].startswith(command):
             count += 1
-            args = danmu_obj['text'].split()
-            duration = int(args[2])
+            args = danmu_obj['text'].removeprefix(command).strip().split()
+            duration = int(args[0])
             end_time = datetime.datetime.fromtimestamp(danmu_obj['time'])
             start_time = end_time - datetime.timedelta(seconds=duration)
             hint_text = f"手动切片_{count}"
-            if len(args) >= 4:
-                hint_text = " ".join(args[3:])
+            if len(args) >= 2:
+                hint_text = " ".join(args[1:])
             cut_points.append((start_time, end_time, [hint_text]))
     return cut_points
 
@@ -149,9 +150,17 @@ class Processor(BiliLive):
         logging.basicConfig(level=utils.get_log_level(config),
                             format='%(asctime)s %(thread)d %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                             datefmt='%a, %d %b %Y %H:%M:%S',
-                            filename=os.path.join(config.get('root', {}).get('logger', {}).get('log_path', "./log"), "Processor_"+datetime.datetime.now(
-                            ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'),
-                            filemode='a')
+                            handlers=[
+                                logging.FileHandler(
+                                    os.path.join(
+                                        config.get('root', {}).get('logger', {}).get('log_path', "./log"),
+                                        "Processor_"+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+'.log',
+                                    ),
+                                    mode='a',
+                                    encoding='utf-8',
+                                )
+                            ],
+                            force=True)
         self.ffmpeg_logfile_hander = open(os.path.join(config.get('root', {}).get('logger', {}).get('log_path', "./log"), "FFMpeg_"+datetime.datetime.now(
         ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), mode="a", encoding="utf-8")
 
@@ -202,11 +211,12 @@ class Processor(BiliLive):
                          ['format']['duration'])
         for cut_start, cut_end, tags in cut_points:
             start = get_true_timestamp(self.times,
-                                       cut_start) + self.config['spec']['clipper']['start_offset']
+                                       cut_start) + self.config.get('spec', {}).get('clipper', {}).get('start_offset', 0)
             end = min(get_true_timestamp(self.times,
-                                         cut_end) + self.config['spec']['clipper']['end_offset'], duration)
+                                         cut_end) + self.config.get('spec', {}).get('clipper', {}).get('end_offset', 0), duration)
             delta = end-start
             outhint = " ".join(tags)
+            logging.debug("Cut point [%s, %s] hint=%s", start, end, outhint)
             if delta >= min_length:
                 ret = self.__cut_video(outhint, max(
                     0, int(start)), int(delta))
@@ -252,12 +262,15 @@ class Processor(BiliLive):
             #     self.times[-1][0]-self.times[0][0]).total_seconds()+self.times[-1][1]
 
             if not self.config.get('spec', {}).get('clipper', {}).get('enable_clipper', False) and not self.config.get('spec', {}).get('manual_clipper', {}).get('enabled', False):
+                logging.info('Clipper and manual clipper are both disabled')
                 os.rmdir(self.outputs_dir)
 
             if not self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False):
+                logging.info('Record uploader disabled')
                 os.rmdir(self.splits_dir)
 
             if self.config.get('spec', {}).get('clipper', {}).get('enable_clipper', False):
+                logging.info('Processing clipper')
                 danmu_list = parse_danmu(self.danmu_path)
                 counted_danmu_dict = count(
                     danmu_list, self.live_start, self.live_duration, self.config.get('spec', {}).get('parser', {}).get('interval', 60))
@@ -267,9 +280,13 @@ class Processor(BiliLive):
                     'clipper', {}).get('min_length', 60))
                 success = success and ret
             if self.config.get('spec', {}).get('manual_clipper', {}).get('enabled', False):
+                logging.info('Processing manual clipper')
                 danmu_list = parse_danmu(self.danmu_path)
-                cut_points = get_manual_cut_points(danmu_list, self.config.get(
-                    'spec', {}).get('manual_clipper', {}).get('uid', ""))
+                cut_points = get_manual_cut_points(
+                    danmu_list,
+                    self.config.get('spec', {}).get('manual_clipper', {}).get('uid', ""),
+                    self.config.get('spec', {}).get('manual_clipper', {}).get('command', '/DDR clip'),
+                )
                 ret = self.cut(cut_points, 0)
                 success = success and ret
             if self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False):
