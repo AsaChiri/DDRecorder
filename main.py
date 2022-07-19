@@ -12,7 +12,7 @@ import utils
 from MainRunner import MainThreadRunner
 
 
-CURRENT_VERSION = "1.2.3"
+CURRENT_VERSION = "1.3.0"
 
 
 
@@ -25,11 +25,11 @@ class versionThread(threading.Thread):
             latest_version = lastversion.has_update(
                 repo="AsaChiri/DDRecorder", current_version=CURRENT_VERSION)
             if latest_version:
-                print('DDRecorder有更新，版本号: {} 请尽快到https://github.com/AsaChiri/DDRecorder/releases 下载最新版'.format(str(latest_version)))
+                print('DDRecorder 有更新，版本号：{} 请尽快到 https://github.com/AsaChiri/DDRecorder/releases 下载最新版'.format(str(latest_version)))
             else:
-                print('DDRecorder已是最新版本！')
+                print('DDRecorder 已是最新版本！')
         except:
-            print('无法获取DDRecorder的版本信息，当前版本号: {}，请到https://github.com/AsaChiri/DDRecorder/releases 检查最新版本'.format(CURRENT_VERSION))
+            print('无法获取 DDRecorder 的版本信息，当前版本号：{}，请到 https://github.com/AsaChiri/DDRecorder/releases 检查最新版本'.format(CURRENT_VERSION))
 
 
 
