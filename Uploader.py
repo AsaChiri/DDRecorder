@@ -16,6 +16,8 @@ class Uploader(BiliLive):
         self.splits_dir = splits_dir
 
         self.uploader = BiliBili(Data())
+        self.lines = config.get("root", {}).get(
+            "uploader", {}).get("lines", "AUTO")
         account = {'account':
                    {
                        'username': self.config.get('spec', {}).get('uploader', {}).get('account', {}).get('username', ""),
@@ -69,11 +71,14 @@ class Uploader(BiliLive):
 
                 self.uploader.video = clips_video_data
                 filelists = os.listdir(self.output_dir)
+                filelists.sort(key=lambda x: int(
+                    os.path.splitext(x)[0].split("_")[-2]))
                 for filename in filelists:
                     if os.path.getsize(os.path.join(self.output_dir, filename)) < 1024*1024:
                         continue
                     file_path = os.path.join(self.output_dir, filename)
-                    video_part = self.uploader.upload_file(file_path)
+                    video_part = self.uploader.upload_file(
+                        file_path, lines=self.lines)
                     video_part['title'] = os.path.splitext(filename)[
                         0].split("_")[-1]
                     video_part['desc'] = self.config.get('spec', {}).get('uploader', {}).get(
@@ -107,11 +112,14 @@ class Uploader(BiliLive):
                 self.uploader.video = record_video_data
 
                 filelists = os.listdir(self.splits_dir)
+                filelists.sort(key=lambda x: int(
+                    os.path.splitext(x)[0].split("_")[-1]))
                 for filename in filelists:
                     if os.path.getsize(os.path.join(self.splits_dir, filename)) < 1024*1024:
                         continue
                     file_path = os.path.join(self.splits_dir, filename)
-                    video_part = self.uploader.upload_file(file_path)
+                    video_part = self.uploader.upload_file(
+                        file_path, lines=self.lines)
                     video_part['title'] = os.path.splitext(filename)[
                         0].split("_")[-1]
                     video_part['desc'] = self.config.get('spec', {}).get('uploader', {}).get(

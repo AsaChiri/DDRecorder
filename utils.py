@@ -1,13 +1,18 @@
 from collections import Counter
-import jieba
-import os
+
+import ctypes
 import datetime
 import logging
+import os
 import platform
-import ctypes
-from enum import Enum
-import prettytable as pt
 import threading
+from enum import Enum
+
+import prettytable as pt
+from fastHan import FastHan
+
+model = FastHan()
+model.set_cws_style('wtb')
 
 
 def is_windows() -> bool:
@@ -180,8 +185,10 @@ def print_log(runner_list: list) -> str:
     print("\n")
 
 
-def get_words(txt, topK=5):
-    seg_list = jieba.cut(txt)  # 对文本进行分词
+def get_words(txts, topK=5):
+    seg_list = []
+    for txt in txts:
+        seg_list.extend(model(txt)[0])
     c = Counter()
     for x in seg_list:  # 进行词频统计
         if len(x) > 1 and x != '\r\n' and x != '\n':

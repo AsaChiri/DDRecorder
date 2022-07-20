@@ -49,7 +49,7 @@ def get_cut_points(time_dict: Dict[datetime.datetime, List[str]], up_ratio: floa
             status = 1
             temp_texts.extend(texts)
         elif status == 1 and len(texts) < prev_num*down_ratio:
-            tags = utils.get_words("。".join(texts), topK=topK)
+            tags = utils.get_words(texts, topK=topK)
             cut_points.append((start_time, time, tags))
             status = 0
             start_time = time
@@ -300,10 +300,10 @@ class Processor(BiliLive):
 
 
 if __name__ == "__main__":
-    danmu_list = parse_danmu("data/data/danmu/22603245_2021-03-13_11-20-16")
-    # counted_danmu_dict = count(
-    #     danmu_list, datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2021-03-13_13-45-16", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
-    # cut_points = get_cut_points(counted_danmu_dict, 2.5,
-    #                             0.75, 5)
-    cut_points = get_manual_cut_points(danmu_list, "8559982")
+    danmu_list = parse_danmu("data/data/danmu/22603245_2022-04-17_08-40-42")
+    counted_danmu_dict = count(
+        danmu_list, datetime.datetime.strptime("2022-04-17_08-40-42", "%Y-%m-%d_%H-%M-%S"), (datetime.datetime.strptime("2022-04-17_13-14-37", "%Y-%m-%d_%H-%M-%S")-datetime.datetime.strptime("2021-03-13_11-20-16", "%Y-%m-%d_%H-%M-%S")).total_seconds(), 30)
+    cut_points = get_cut_points(counted_danmu_dict, 2.5,
+                                0.75, 5)
+    # cut_points = get_manual_cut_points(danmu_list, "8559982")
     print(cut_points)
