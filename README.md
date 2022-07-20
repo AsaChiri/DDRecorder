@@ -1,7 +1,9 @@
 # DDRecorder
+
  Headless 全自动 B 站直播录播、切片、上传一体工具
  
 **>=1.1.2 版本增加了自动检查更新功能，需要连接至 Github 服务器，敬请留意。**
+
 
 ## 感谢
 FortuneDayssss/BilibiliUploader
