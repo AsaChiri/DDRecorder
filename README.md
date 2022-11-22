@@ -94,6 +94,7 @@ fastnlp/fastHan
 - manual_clipper: 手动切片器相关设置
   - enabled：启用手动切片器功能。默认：false
   - uid：手动切片器接受指令的用户 UID。
+  - command: 自定义手动切片触发指令。
 - uploader: 上传器相关设置
   - account: 上传账户信息
     - username: 用户名
