@@ -30,7 +30,7 @@ fastnlp/fastHan
 
 
 ## 安装指南（MacOS/Linux）
-1. 安装 Python >= 3.8 https://www.python.org/downloads/release/python-3104/
+1. 安装 Python >= **3.9** https://www.python.org/downloads/release/python-3104/
 2. 安装 ffmpeg https://ffmpeg.org/download.html
 3. 执行 pip install -r requirements.txt
 4. 修改 config 文件夹下的配置文件 config.json
