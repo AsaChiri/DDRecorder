@@ -165,7 +165,7 @@ class Processor(BiliLive):
         ).strftime('%Y-%m-%d_%H-%M-%S')+'.log'), mode="a", encoding="utf-8")
 
     def pre_concat(self) -> Union[subprocess.CompletedProcess, subprocess.CalledProcessError]:
-        filelist = os.listdir(self.record_dir)
+        filelist = sorted(os.listdir(self.record_dir),key=get_start_time)
         with open(self.merge_conf_path, "w", encoding="utf-8") as f:
             for filename in filelist:
                 if os.path.splitext(
