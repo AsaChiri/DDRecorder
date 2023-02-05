@@ -1,7 +1,7 @@
 biliup>=0.2.11
 brotli>=1.0.9
 brotlipy>=0.7.0
-bypy>=1.8.0
+bypy>=1.8.2
 FastNLP~=0.7.0
 fastHan>=1.7
 jsonlines>=3.0.0
