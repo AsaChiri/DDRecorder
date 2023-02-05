@@ -25,13 +25,13 @@ if is_windows():
 
 
 def get_log_level(config: dict) -> int:
-    if config['root']['logger']['log_level'] == 'DEBUG':
+    if config.get('root', {}).get('logger', {}).get('log_level','DEBUG') == 'DEBUG':
         return logging.DEBUG
-    if config['root']['logger']['log_level'] == 'INFO':
+    if config.get('root', {}).get('logger', {}).get('log_level','DEBUG') == 'INFO':
         return logging.INFO
-    if config['root']['logger']['log_level'] == 'WARN':
+    if config.get('root', {}).get('logger', {}).get('log_level','DEBUG') == 'WARN':
         return logging.WARN
-    if config['root']['logger']['log_level'] == 'ERROR':
+    if config.get('root', {}).get('logger', {}).get('log_level','DEBUG') == 'ERROR':
         return logging.ERROR
     return logging.INFO
 
