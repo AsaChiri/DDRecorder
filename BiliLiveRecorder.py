@@ -24,10 +24,8 @@ class BiliLiveRecorder(BiliLive):
             logging.info(self.generate_log('√ 正在录制...' + self.room_id))
             default_headers = {
                 'Accept-Encoding': 'identity',
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36 ',
-                'Referer': re.findall(
-                    r'(https://.*\/).*\.flv',
-                    record_url)[0]
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
+                'Referer': 'https://live.bilibili.com/'
             }
             headers = {**default_headers, **
                        self.config.get('root', {}).get('request_header', {})}
@@ -63,3 +61,13 @@ class BiliLiveRecorder(BiliLive):
             except Exception as e:
                 logging.error(self.generate_log(
                     'Error while checking or recording:' + str(e)+traceback.format_exc()))
+
+if __name__ == "__main__":
+    config = {
+        "root": {},
+        "spec": {
+            "room_id": "22603245"
+        }
+    }
+    global_start = datetime.datetime.now()
+    BiliLiveRecorder(config, global_start).run()

@@ -112,14 +112,14 @@ class BiliDanmuRecorder(BiliLive):
         #     self.__printDM(data)
         #     return
 
-        # ver 为1的时候为进入房间后或心跳包服务器的回应。op 为3的时候为房间的人气值。
+        # ver 为 1 的时候为进入房间后或心跳包服务器的回应。op 为 3 的时候为房间的人气值。
         if ver == 1:
             if op == 8:
                 logging.debug(self.generate_log(
                     '[VERIFY]  {}\n'.format(json.loads(data[16:].decode('utf-8', errors='ignore')))))
 
-        # ver 不为2也不为1目前就只能是0了，也就是普通的 json 数据。
-        # op 为5意味着这是通知消息，cmd 基本就那几个了。
+        # ver 不为 2 也不为 1 目前就只能是 0 了，也就是普通的 json 数据。
+        # op 为 5 意味着这是通知消息，cmd 基本就那几个了。
         if (ver == 0 or ver == 2) and op == 5:
             try:
                 jd = json.loads(data[16:].decode('utf-8', errors='ignore'))
