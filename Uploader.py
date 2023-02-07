@@ -88,12 +88,13 @@ class Uploader(BiliLive):
                         'uploader', {}).get('clips', {}).get('cover', "")):
                     clips_video_data.cover = self.uploader.cover_up(self.config.get('spec', {}).get(
                         'uploader', {}).get('clips', {}).get('cover', ""))
-                clips_video_ret = self.uploader.submit()
-                if clips_video_ret['code'] == 0 and clips_video_ret['data'] is not None:
-                    return_dict["clips"] = {
-                        "avid": clips_video_ret['data']['aid'],
-                        "bvid": clips_video_ret['data']['bvid']
-                    }
+                if len(clips_video_data) > 0:
+                    clips_video_ret = self.uploader.submit()
+                    if clips_video_ret['code'] == 0 and clips_video_ret['data'] is not None:
+                        return_dict["clips"] = {
+                            "avid": clips_video_ret['data']['aid'],
+                            "bvid": clips_video_ret['data']['bvid']
+                        }
 
             if self.config.get('spec', {}).get('uploader', {}).get('record', {}).get('upload_record', False):
                 record_video_data = Data()
@@ -129,12 +130,13 @@ class Uploader(BiliLive):
                         'uploader', {}).get('record', {}).get('cover', "")):
                     record_video_data.cover = self.uploader.cover_up(self.config.get('spec', {}).get(
                         'uploader', {}).get('record', {}).get('cover', ""))
-                record_video_ret = self.uploader.submit()
-                if record_video_ret['code'] == 0 and record_video_ret['data'] is not None:
-                    return_dict["record"] = {
-                        "avid": record_video_ret['data']['aid'],
-                        "bvid": record_video_ret['data']['bvid']
-                    }
+                if len(record_video_data) > 0:
+                    record_video_ret = self.uploader.submit()
+                    if record_video_ret['code'] == 0 and record_video_ret['data'] is not None:
+                        return_dict["record"] = {
+                            "avid": record_video_ret['data']['aid'],
+                            "bvid": record_video_ret['data']['bvid']
+                        }
 
         except Exception as e:
             logging.error(self.generate_log(
