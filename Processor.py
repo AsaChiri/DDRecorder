@@ -183,6 +183,9 @@ class Processor(BiliLive):
                     self.times.append((start_time, duration))
                     f.write(
                         f"file '{os.path.abspath(ts_path)}'\n")
+        if len(self.times) == 0:
+            logging.error("No valid record found.")
+            return None
         ret = concat(self.merge_conf_path, self.merged_file_path,
                      self.ffmpeg_logfile_hander)
         self.times.sort(key=lambda x: x[0])
