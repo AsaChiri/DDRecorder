@@ -84,7 +84,7 @@ class Uploader(BiliLive):
                     video_part['desc'] = self.config.get('spec', {}).get('uploader', {}).get(
                         'clips', {}).get('desc', "").format(**format_dict)
                     clips_video_data.append(video_part)
-                if len(clips_video_data) == 0:
+                if len(clips_video_data.videos) == 0:
                     logging.warn(self.generate_log(
                     '没有可用于上传的自动切片！'))
                     self.uploader.video = None
@@ -131,7 +131,7 @@ class Uploader(BiliLive):
                     video_part['desc'] = self.config.get('spec', {}).get('uploader', {}).get(
                         'record', {}).get('desc', "").format(**format_dict)
                     record_video_data.append(video_part)
-                if len(record_video_data) == 0:
+                if len(record_video_data.videos) == 0:
                     logging.warn(self.generate_log(
                     '没有可用于上传的录播分段！'))
                     self.uploader.video = None
