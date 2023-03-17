@@ -18,14 +18,8 @@ class Uploader(BiliLive):
         self.uploader = BiliBili(Data())
         self.lines = config.get("root", {}).get(
             "uploader", {}).get("lines", "AUTO")
-        account = {'account':
-                   {
-                       'username': self.config.get('spec', {}).get('uploader', {}).get('account', {}).get('username', ""),
-                       'password': self.config.get('spec', {}).get('uploader', {}).get('account', {}).get('password', "")
-                   },
-                   'access_token': self.config.get('spec', {}).get('uploader', {}).get('account', {}).get('access_token', ''),
-                   'refresh_token': self.config.get('spec', {}).get('uploader', {}).get('account', {}).get('refresh_token', ''),
-                   'cookies': self.config.get('spec', {}).get('uploader', {}).get('account', {}).get('cookies', None)}
+
+        account = get_account(self.config.get('spec', {}), config.get("root", {}))
 
         try:
             self.uploader.login(utils.get_cred_filename(
@@ -157,16 +151,60 @@ class Uploader(BiliLive):
         return return_dict
 
 
+def get_account(spec_config: dict, root_config: dict = None) -> dict:
+    account_config = spec_config.get('uploader', {}).get('account', 'default')
+    if isinstance(account_config, str) or not account_config:
+        account_config = get_root_account_by_name(root_config, account_config)
+
+    return {
+            'account':
+            {
+                'username': account_config.get('username', ""),
+                'password': account_config.get('password', "")
+            },
+            'access_token': account_config.get('access_token', ''),
+            'refresh_token': account_config.get('refresh_token', ''),
+            'cookies': account_config.get('cookies', None)
+        }
+
+
+def get_root_account_by_name(root_config: dict, name: str = None) -> dict:
+    if not name:
+        name = 'default'
+
+    account = root_config.get('account', {}).get(name, {})
+    if isinstance(account, str):
+        with open(account, encoding='utf-8') as cookie_file:
+            account = {"cookies": {}}
+            cookie_json = json.load(cookie_file)
+        for i in cookie_json["cookie_info"]["cookies"]:
+            name = i["name"]
+            account["cookies"][name] = i["value"]
+        account["access_token"] = cookie_json["token_info"]["access_token"]
+    return account
+
+
 if __name__ == '__main__':
-    all_config_filename = 'config/config.spec.json'
-    with open(all_config_filename, "r", encoding="UTF-8") as f:
+    import argparse
+    parser = argparse.ArgumentParser(description='DDRecorder uploader')
+    parser.add_argument('-c', '--config', type=str, default=None, required=True, help='配置文件路径')
+    parser.add_argument('-i', '--spec_index', type=int, default=0, help='spec 索引，从0开始计数')
+    parser.add_argument('-o', '--output_dir', type=str, default='', help='切片的保存目录')
+    parser.add_argument('-s', '--splits_dir', type=str, default='', help='splits dir')
+
+    args = parser.parse_args()
+
+    with open(args.config, "r", encoding="UTF-8") as f:
         all_config = json.load(f)
 
     config = {
         'root': all_config.get('root', {}),
-        'spec': all_config['spec'][0]
+        'spec': all_config['spec'][args.spec_index]
     }
     uploader = Uploader(
-        output_dir='data\\data\\outputs\\8792912_2022-04-16_06-58-40', splits_dir='', config=config)
-    uploader.upload(global_start=datetime.datetime.strptime(
-        '2022-04-16_06-58-40', '%Y-%m-%d_%H-%M-%S'))
+        output_dir=args.output_dir, splits_dir=args.splits_dir, config=config)
+
+    media_path = args.output_dir or args.splits_dir
+    time_str = '_'.join(os.path.basename(media_path).split('_')[1:])
+    start_time = datetime.datetime.strptime(time_str, '%Y-%m-%d_%H-%M-%S')
+    uploader.upload(global_start=start_time)
