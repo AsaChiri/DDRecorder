@@ -188,7 +188,6 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='DDRecorder uploader')
     parser.add_argument('-c', '--config', type=str, default=None, required=True, help='配置文件路径')
-    parser.add_argument('-i', '--spec_index', type=int, default=0, help='spec 索引，从0开始计数')
     parser.add_argument('-o', '--output_dir', type=str, default='', help='切片的保存目录')
     parser.add_argument('-s', '--splits_dir', type=str, default='', help='splits dir')
 
@@ -197,14 +196,25 @@ if __name__ == '__main__':
     with open(args.config, "r", encoding="UTF-8") as f:
         all_config = json.load(f)
 
+    media_path = args.output_dir or args.splits_dir
+    media_name_split = os.path.basename(media_path).split('_')
+    rom_id = media_name_split[0]
+    for temp_spec in all_config['spec']:
+        if str(temp_spec['room_id']) == rom_id:
+            spec = temp_spec
+            break
+    else:
+        logging.error(f'找到不rom id {rom_id}对应的配置')
+        exit(1)
+
+    # noinspection PyUnboundLocalVariable
     config = {
         'root': all_config.get('root', {}),
-        'spec': all_config['spec'][args.spec_index]
+        'spec': spec
     }
     uploader = Uploader(
         output_dir=args.output_dir, splits_dir=args.splits_dir, config=config)
 
-    media_path = args.output_dir or args.splits_dir
-    time_str = '_'.join(os.path.basename(media_path).split('_')[1:])
+    time_str = '_'.join(media_name_split[1:])
     start_time = datetime.datetime.strptime(time_str, '%Y-%m-%d_%H-%M-%S')
     uploader.upload(global_start=start_time)
