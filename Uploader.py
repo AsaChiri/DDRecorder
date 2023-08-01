@@ -66,7 +66,7 @@ class Uploader(BiliLive):
                 self.uploader.video = clips_video_data
                 filelists = os.listdir(self.output_dir)
                 filelists.sort(key=lambda x: int(
-                    "".join(os.path.splitext(x)[0].split("_")[-2].split("-"))))
+                    "".join(os.path.splitext(x)[0].split("_")[3].split("-"))))
                 for filename in filelists:
                     if os.path.getsize(os.path.join(self.output_dir, filename)) < 1024*1024:
                         continue
